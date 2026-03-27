@@ -1,0 +1,27 @@
+{
+	"name": "pi-models",
+	"version": "0.1.0",
+	"description": "Quality-of-life Pi extension for browsing and selecting models with a cascading menu interface",
+	"main": "pi-models.ts",
+	"keywords": [
+		"pi",
+		"pi-extension",
+		"models",
+		"llm"
+	],
+	"author": "",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/apmantza/pi-models.git"
+	},
+	"files": [
+		"pi-models.ts",
+		"README.md"
+	],
+	"pi": {
+		"extensions": [
+			"./pi-models.ts"
+		]
+	}
+}
