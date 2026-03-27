@@ -30,25 +30,25 @@ Level 1: Provider list          Level 2: Model list
 
 ## Installation
 
-### Via settings.json (recommended)
+### Via pi install (recommended)
+
+```bash
+pi install npm:pi-models
+```
+
+This installs the package and adds it to your `settings.json` automatically. Run `/reload` in Pi to pick up changes.
+
+### Via settings.json
 
 Add to `~/.pi/agent/settings.json`:
 
 ```json
 {
-  "packages": ["npm:pi-models@latest"]
+  "packages": ["npm:pi-models"]
 }
 ```
 
-Pi will automatically download and load the extension. Run `/reload` to pick up changes.
-
-### Via npm global install
-
-```bash
-npm install -g pi-models
-```
-
-Pi discovers extensions from global `node_modules`. Run `/reload` in Pi.
+Then run `/reload` in Pi.
 
 ### Via GitHub (manual)
 
