@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "files": {
+    "..\\pi-models.ts": {
+      "latest": {
+        "commit": "unknown",
+        "timestamp": "2026-03-27T12:23:04.750Z",
+        "mi": 31.1,
+        "cognitive": 64,
+        "nesting": 4,
+        "lines": 148
+      },
+      "history": [
+        {
+          "commit": "unknown",
+          "timestamp": "2026-03-27T12:16:54.008Z",
+          "mi": 32.7,
+          "cognitive": 71,
+          "nesting": 6,
+          "lines": 137
+        },
+        {
+          "commit": "unknown",
+          "timestamp": "2026-03-27T12:21:17.608Z",
+          "mi": 33.7,
+          "cognitive": 71,
+          "nesting": 6,
+          "lines": 138
+        },
+        {
+          "commit": "unknown",
+          "timestamp": "2026-03-27T12:23:04.750Z",
+          "mi": 31.1,
+          "cognitive": 64,
+          "nesting": 4,
+          "lines": 148
+        }
+      ],
+      "trend": "stable"
+    }
+  },
+  "capturedAt": "2026-03-27T12:23:11.504Z"
+}
