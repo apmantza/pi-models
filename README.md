@@ -30,14 +30,35 @@ Level 1: Provider list          Level 2: Model list
 
 ## Installation
 
-Copy `pi-models.ts` to your Pi extensions folder:
+### Via npm (recommended)
+
+Add to your Pi `settings.json`:
+
+```json
+{
+  "packages": ["npm:pi-models@latest"]
+}
+```
+
+Or install manually:
 
 ```bash
-# Global (all projects)
-cp pi-models.ts ~/.pi/agent/extensions/
+npm install -g pi-models
+```
 
-# Or project-local
-cp pi-models.ts .pi/extensions/
+Then run `/reload` in Pi.
+
+### Via GitHub
+
+```bash
+cd ~/.pi/agent/extensions
+git clone https://github.com/apmantza/pi-models.git
+```
+
+Or copy the file manually:
+
+```bash
+cp pi-models.ts ~/.pi/agent/extensions/
 ```
 
 Then run `/reload` in Pi.
