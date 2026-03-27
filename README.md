@@ -30,9 +30,9 @@ Level 1: Provider list          Level 2: Model list
 
 ## Installation
 
-### Via npm (recommended)
+### Via settings.json (recommended)
 
-Add to your Pi `settings.json`:
+Add to `~/.pi/agent/settings.json`:
 
 ```json
 {
@@ -40,28 +40,30 @@ Add to your Pi `settings.json`:
 }
 ```
 
-Or install manually:
+Pi will automatically download and load the extension. Run `/reload` to pick up changes.
+
+### Via npm global install
 
 ```bash
 npm install -g pi-models
 ```
 
-Then run `/reload` in Pi.
+Pi discovers extensions from global `node_modules`. Run `/reload` in Pi.
 
-### Via GitHub
+### Via GitHub (manual)
 
 ```bash
 cd ~/.pi/agent/extensions
 git clone https://github.com/apmantza/pi-models.git
 ```
 
-Or copy the file manually:
+Or copy just the file:
 
 ```bash
 cp pi-models.ts ~/.pi/agent/extensions/
 ```
 
-Then run `/reload` in Pi.
+Run `/reload` in Pi.
 
 ## Requirements
 
