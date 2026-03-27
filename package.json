@@ -1,6 +1,6 @@
 {
 	"name": "pi-models",
-	"version": "0.1.2",
+	"version": "0.1.3",
 	"description": "Quality-of-life Pi extension for browsing and selecting models with a cascading menu interface",
 	"main": "pi-models.ts",
 	"keywords": [
