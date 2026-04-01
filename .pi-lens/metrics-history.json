@@ -37,7 +37,76 @@
         }
       ],
       "trend": "stable"
+    },
+    "pi-models.ts": {
+      "latest": {
+        "commit": "unknown",
+        "timestamp": "2026-03-31T23:02:30.726Z",
+        "mi": 22,
+        "cognitive": 140,
+        "nesting": 7,
+        "lines": 287
+      },
+      "history": [
+        {
+          "commit": "unknown",
+          "timestamp": "2026-03-31T21:25:55.392Z",
+          "mi": 30.8,
+          "cognitive": 64,
+          "nesting": 4,
+          "lines": 151
+        },
+        {
+          "commit": "unknown",
+          "timestamp": "2026-03-31T21:30:07.234Z",
+          "mi": 27.7,
+          "cognitive": 64,
+          "nesting": 4,
+          "lines": 193
+        },
+        {
+          "commit": "unknown",
+          "timestamp": "2026-03-31T22:27:13.837Z",
+          "mi": 27.4,
+          "cognitive": 64,
+          "nesting": 4,
+          "lines": 201
+        },
+        {
+          "commit": "unknown",
+          "timestamp": "2026-03-31T22:45:33.496Z",
+          "mi": 27.3,
+          "cognitive": 64,
+          "nesting": 4,
+          "lines": 202
+        },
+        {
+          "commit": "unknown",
+          "timestamp": "2026-03-31T22:47:30.553Z",
+          "mi": 27.4,
+          "cognitive": 64,
+          "nesting": 4,
+          "lines": 201
+        },
+        {
+          "commit": "unknown",
+          "timestamp": "2026-03-31T22:51:17.907Z",
+          "mi": 27.9,
+          "cognitive": 54,
+          "nesting": 4,
+          "lines": 196
+        },
+        {
+          "commit": "unknown",
+          "timestamp": "2026-03-31T23:02:30.726Z",
+          "mi": 22,
+          "cognitive": 140,
+          "nesting": 7,
+          "lines": 287
+        }
+      ],
+      "trend": "regressing"
     }
   },
-  "capturedAt": "2026-03-27T12:23:11.504Z"
+  "capturedAt": "2026-03-31T23:02:51.937Z"
 }
