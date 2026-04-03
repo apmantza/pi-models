@@ -97,22 +97,23 @@ The extension automatically categorizes models using pattern matching on model I
 
 | Family | Pattern | Example IDs Matched |
 |--------|---------|---------------------|
-| **Claude Opus** | `claude` + `opus` | `claude-opus-4`, `claude-opus-4-20250514` |
-| **Claude Sonnet** | `claude` + `sonnet` | `claude-sonnet-4`, `claude-sonnet-3-20240229` |
-| **Claude Haiku** | `claude` + `haiku` | `claude-haiku-3`, `claude-haiku-3-20240307` |
-| **GPT-4o** | `gpt` + `4o` | `gpt-4o`, `gpt-4o-2024-08-06` |
-| **GPT-4** | `gpt` + `4` | `gpt-4`, `gpt-4-turbo` |
-| **GPT-3.5** | `gpt` + `3.5` | `gpt-3.5-turbo` |
-| **GPT o1/o3** | `gpt` + `o1`/`o3` | `o1-preview`, `o3-mini` |
-| **Gemini Ultra** | `gemini` + `ultra` | `gemini-1.0-ultra` |
-| **Gemini Pro** | `gemini` + `pro` | `gemini-1.5-pro` |
-| **Gemini Flash** | `gemini` + `flash` | `gemini-1.5-flash` |
-| **Llama 3.x** | `llama` + version | `llama3.2`, `llama-3.3-70b` |
-| **DeepSeek** | `deepseek` + variant | `deepseek-chat`, `deepseek-r1` |
-| **Ollama** | `ollama:` prefix | `ollama:llama3.2`, `ollama:qwen2.5` |
-| **Other** | fallback | `{provider} {base-name}` |
+| **Claude** | `claude` | `claude-opus-4`, `claude-sonnet-3.5`, `claude-haiku-3` |
+| **GPT** | `gpt` | `gpt-4o`, `gpt-4-turbo`, `gpt-3.5-turbo`, `o1-preview` |
+| **Gemini** | `gemini` | `gemini-1.5-pro`, `gemini-1.5-flash`, `gemini-ultra` |
+| **Llama** | `llama` | `llama3.2`, `llama-3.3-70b`, `codellama-70b` |
+| **DeepSeek** | `deepseek` | `deepseek-chat`, `deepseek-r1` |
+| **Qwen** | `qwen` | `qwen3.5-397b`, `qwen3-coder`, `qwen3-vl` |
+| **MiniMax** | `minimax` | `minimax-m2.5`, `minimax-m2` |
+| **Kimi** | `kimi` or `moonshot` | `kimi-k2.5`, `moonshot-v1-32k` |
+| **GLM** | `glm` or `chatglm` | `glm-4.7`, `glm-5`, `chatglm3` |
+| **Nemotron** | `nemotron` | `nemotron-4-340b`, `nemotron-3-super` |
+| **Mistral** | `mistral` | `mistral-large-3`, `mistral-small` |
+| **Arcee** | `arcee` or `trinity` | `trinity-large-preview`, `arcee-ai/trinity-mini` |
+| **Other** | `router`, `auto` | Router models grouped separately |
 
-**Note:** For model families with versioned releases (dated suffixes), the extension sorts by ID descending and picks the latest version by default.
+**Multi-Provider Grouping:** Models with the same name from different providers (e.g., `Trinity Large Preview` from zen, kilo, cline) are automatically merged into the same family.
+
+**Ollama Models:** Local Ollama models are grouped with their brand families (e.g., `ollama/llama3.2` → Llama family, `ollama/qwen2.5` → Qwen family).
 
 ---
 
@@ -143,8 +144,10 @@ npm run typecheck
 | `isModelFree()` | 5 tests - cost checking edge cases |
 | `formatModelName()` | 3 tests - name vs ID handling |
 | `getProviders()` | 5 tests - grouping, sorting, free counting |
-| `detectModelFamily()` | 25 tests - all model family patterns |
-| `getModelFamilies()` | 5 tests - grouping, sorting, multi-provider |
+| `detectModelFamily()` | 42 tests - all model family patterns, ollama, routers, multi-provider |
+| `getModelFamilies()` | 5 tests - grouping, sorting, name-based merging |
+
+**Total: 60 tests** covering all major functionality and edge cases.
 
 ---
 
@@ -205,6 +208,14 @@ Run `/reload` in Pi.
 ---
 
 ## Changelog
+
+### 0.2.1
+- **Fixed:** Ollama models now group with brand families instead of separate `ollama-*` families
+- **New:** Name-based family merging - models with same name from different providers auto-merge
+- **New:** Arcee/Trinity model family support
+- **New:** Router models (`router`, `auto`, `kilo-auto/free`) grouped into "Other" family
+- **New:** Mistral model family support
+- **New:** Complete test suite (60 tests)
 
 ### 0.2.0
 - **New:** Browse mode selection (By Provider / By Model Family)
