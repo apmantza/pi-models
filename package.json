@@ -1,6 +1,6 @@
 {
 	"name": "pi-models",
-	"version": "0.1.4",
+	"version": "0.2.0",
 	"description": "Quality-of-life Pi extension for browsing and selecting models with a cascading menu interface",
 	"main": "pi-models.ts",
 	"keywords": [
@@ -10,7 +10,7 @@
 		"llm",
 		"pi-package"
 	],
-	"author": "",
+	"author": "Apostolos Mantzaris",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
@@ -20,6 +20,15 @@
 		"pi-models.ts",
 		"README.md"
 	],
+	"scripts": {
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"typecheck": "tsc --noEmit pi-models.ts"
+	},
+	"devDependencies": {
+		"@types/node": "^20.19.39",
+		"vitest": "^1.6.1"
+	},
 	"pi": {
 		"extensions": [
 			"./pi-models.ts"
