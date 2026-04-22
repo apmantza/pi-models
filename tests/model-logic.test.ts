@@ -9,28 +9,67 @@ import {
 } from "../pi-models";
 
 describe("isModelFree", () => {
-	it("returns true when cost is undefined", () => {
-		const model = { cost: undefined };
-		expect(isModelFree(model)).toBe(true);
-	});
-
-	it("returns true when both costs are 0", () => {
-		const model = { cost: { input: 0, output: 0 } };
-		expect(isModelFree(model)).toBe(true);
-	});
-
-	it("returns false when input cost is non-zero", () => {
-		const model = { cost: { input: 0.01, output: 0 } };
+	it("returns false when cost is undefined and name does not contain 'free'", () => {
+		const model = { cost: undefined, name: "gpt-4", provider: "openai" };
 		expect(isModelFree(model)).toBe(false);
 	});
 
-	it("returns false when output cost is non-zero", () => {
-		const model = { cost: { input: 0, output: 0.01 } };
+	it("returns true when name contains 'free' (for providers without pricing)", () => {
+		const model = { cost: undefined, name: "Llama Free", provider: "ollama" };
+		expect(isModelFree(model)).toBe(true);
+	});
+
+	it("returns true for pricing-exposed provider when both costs are 0", () => {
+		const model = {
+			cost: { input: 0, output: 0 },
+			name: "claude-3-haiku",
+			provider: "kilo",
+		};
+		expect(isModelFree(model)).toBe(true);
+	});
+
+	it("returns false for pricing-exposed provider when input cost is non-zero", () => {
+		const model = {
+			cost: { input: 0.01, output: 0 },
+			name: "gpt-4",
+			provider: "openrouter",
+		};
 		expect(isModelFree(model)).toBe(false);
 	});
 
-	it("returns false when both costs are non-zero", () => {
-		const model = { cost: { input: 0.01, output: 0.02 } };
+	it("returns false for non-pricing provider even with cost 0 (no pricing API)", () => {
+		const model = {
+			cost: { input: 0, output: 0 },
+			name: "gpt-4",
+			provider: "openai",
+		};
+		expect(isModelFree(model)).toBe(false);
+	});
+
+	it("returns true for non-pricing provider when name contains 'free'", () => {
+		const model = {
+			cost: { input: 0.01, output: 0.02 },
+			name: "Free Model",
+			provider: "some-provider",
+		};
+		expect(isModelFree(model)).toBe(true);
+	});
+
+	it("returns false when output cost is non-zero for pricing-exposed provider", () => {
+		const model = {
+			cost: { input: 0, output: 0.01 },
+			name: "test-model",
+			provider: "cline",
+		};
+		expect(isModelFree(model)).toBe(false);
+	});
+
+	it("returns false when both costs are non-zero for pricing-exposed provider", () => {
+		const model = {
+			cost: { input: 0.01, output: 0.02 },
+			name: "test-model",
+			provider: "opencode",
+		};
 		expect(isModelFree(model)).toBe(false);
 	});
 });

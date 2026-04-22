@@ -14,7 +14,7 @@ import type {
 	ExtensionContext,
 } from "@mariozechner/pi-coding-agent";
 import {
-	Container,
+	Box,
 	matchesKey,
 	type SelectItem,
 	SelectList,
@@ -33,11 +33,41 @@ export interface ModelInfo {
 	outputCost: number;
 }
 
+// Providers that expose actual per-model pricing via API
+const PRICING_EXPOSED_PROVIDERS = new Set([
+	"openrouter",
+	"opencode",
+	"kilo",
+	"cline",
+]);
+
+/**
+ * Check if a model is free.
+ *
+ * For providers with pricing APIs: uses cost (input === 0 && output === 0)
+ * For providers without pricing: ONLY uses name-based check (name includes "free")
+ */
 export function isModelFree(model: {
 	cost?: { input: number; output: number };
+	name?: string;
+	provider?: string;
 }): boolean {
-	if (!model.cost) return true;
-	return model.cost.input === 0 && model.cost.output === 0;
+	const hasPricing =
+		model.provider && PRICING_EXPOSED_PROVIDERS.has(model.provider);
+
+	// For providers WITH pricing API: cost-based check
+	if (hasPricing) {
+		if ((model.cost?.input ?? 0) === 0 && (model.cost?.output ?? 0) === 0) {
+			return true;
+		}
+	}
+
+	// For providers WITHOUT pricing API: ONLY name-based check
+	if (model.name?.toLowerCase().includes("free")) {
+		return true;
+	}
+
+	return false;
 }
 
 function getAvailableModels(ctx: ExtensionContext): ModelInfo[] {
@@ -528,6 +558,9 @@ async function showProviderView(pi: ExtensionAPI, ctx: ExtensionContext) {
 	}
 }
 
+// Helper to add Greek flag blue background color to text (RGB: 0, 20, 137)
+const bgColor = (text: string): string => `\x1b[48;2;0;20;137m${text}\x1b[0m`;
+
 // Level 1: Uses SelectList for provider selection (has descriptions, needs columns)
 async function showSelect(
 	ctx: ExtensionContext,
@@ -537,9 +570,9 @@ async function showSelect(
 ): Promise<string | null> {
 	return ctx.ui.custom<string | null>(
 		(_tui, theme, _kb, done) => {
-			const container = new Container();
-			container.addChild(new Text(theme.fg("accent", theme.bold(title)), 1, 0));
-			container.addChild(new Spacer(1));
+			const box = new Box(1, 1, bgColor);
+			box.addChild(new Text(theme.fg("accent", theme.bold(title)), 1, 0));
+			box.addChild(new Spacer(1));
 
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const selectList = new (SelectList as any)(
@@ -560,17 +593,17 @@ async function showSelect(
 
 			selectList.onSelect = (item: SelectItem) => done(item.value);
 			selectList.onCancel = () => done(null);
-			container.addChild(selectList);
+			box.addChild(selectList);
 
-			container.addChild(new Spacer(1));
+			box.addChild(new Spacer(1));
 			const helpText = onToggle
 				? "↑↓ navigate • enter select • esc back • tab toggle view"
 				: "↑↓ navigate • enter select • esc back";
-			container.addChild(new Text(theme.fg("dim", helpText), 1, 0));
+			box.addChild(new Text(theme.fg("dim", helpText), 1, 0));
 
 			return {
-				render: (w: number) => container.render(w),
-				invalidate: () => container.invalidate(),
+				render: (w: number) => box.render(w),
+				invalidate: () => box.invalidate(),
 				handleInput: (data: string) => {
 					// Handle Tab for toggle if callback provided
 					if (onToggle && matchesKey(data, "tab")) {
@@ -603,14 +636,12 @@ async function showModelList(
 			};
 			const maxVisible = 15;
 
-			const container = new Container();
+			const box = new Box(1, 1, bgColor);
 
 			const render = () => {
-				container.clear();
-				container.addChild(
-					new Text(theme.fg("accent", theme.bold(title)), 1, 0),
-				);
-				container.addChild(new Spacer(1));
+				box.clear();
+				box.addChild(new Text(theme.fg("accent", theme.bold(title)), 1, 0));
+				box.addChild(new Spacer(1));
 
 				const startIdx = state.offset;
 				const endIdx = Math.min(startIdx + maxVisible, models.length);
@@ -634,8 +665,8 @@ async function showModelList(
 						const providerLower = model.provider.toLowerCase();
 						const nameLower = displayName.toLowerCase();
 						if (
-							nameLower.startsWith(providerLower + " ") ||
-							nameLower.startsWith(providerLower + "-")
+							nameLower.startsWith(`${providerLower} `) ||
+							nameLower.startsWith(`${providerLower}-`)
 						) {
 							// Strip provider prefix from name to avoid duplication
 							displayName = displayName.slice(model.provider.length + 1).trim();
@@ -660,18 +691,18 @@ async function showModelList(
 						const active = isActive ? theme.fg("success", activeIndicator) : "";
 						line = `${prefix}${truncatedName}${active}`;
 					}
-					container.addChild(new Text(line, 1, 0));
+					box.addChild(new Text(line, 1, 0));
 				}
 
 				// Scroll indicator
 				if (models.length > maxVisible) {
-					container.addChild(new Spacer(1));
+					box.addChild(new Spacer(1));
 					const scrollText = `  ${state.selectedIndex + 1}/${models.length}`;
-					container.addChild(new Text(theme.fg("dim", scrollText), 1, 0));
+					box.addChild(new Text(theme.fg("dim", scrollText), 1, 0));
 				}
 
-				container.addChild(new Spacer(1));
-				container.addChild(
+				box.addChild(new Spacer(1));
+				box.addChild(
 					new Text(
 						theme.fg("dim", "↑↓ navigate • enter select • esc back"),
 						1,
@@ -721,9 +752,9 @@ async function showModelList(
 			return {
 				render: (w: number) => {
 					state.lastWidth = w;
-					return container.render(w);
+					return box.render(w);
 				},
-				invalidate: () => container.invalidate(),
+				invalidate: () => box.invalidate(),
 				handleInput,
 			};
 		},
