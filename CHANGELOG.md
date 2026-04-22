@@ -2,6 +2,12 @@
 
 All notable changes to the Pi Models extension.
 
+## [Unreleased]
+
+### Fixed
+- **OpenAI o4 detection:** Added "o4" to the o-series keywords so models like "o4-mini" correctly group under the OpenAI lab instead of creating spurious lab entries.
+- **By Lab view flow:** Removed the intermediate family selection step when browsing by lab. Now shows all models from the selected lab directly. Users who want family filtering can use "By Model Family" view instead.
+
 ## [0.2.1] - 2025-04-03
 
 ### Fixed

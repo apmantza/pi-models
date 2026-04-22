@@ -37,13 +37,15 @@ First, pick how you want to browse:
 ```
 📦 Browse Models
 → 📦 By Provider          ← Browse provider → model
+  🔬 By Lab               ← Browse lab → all models from that lab
   🏷️ By Model Family     ← Browse family → provider → model
 ```
 
 | Mode | Best For | Flow |
 |------|----------|------|
-| **By Provider** | When you know which company (Anthropic, OpenAI) | Provider → Model |
-| **By Model Family** | When you know the model type (Claude, GPT-4) | Family → Provider (if multi) → Model |
+| **By Provider** | When you know which provider hosts the model | Provider → Model |
+| **By Lab** | When you want to see all models from a specific lab/company | Lab → All Models |
+| **By Model Family** | When you know the model type and want family filtering | Family → Provider (if multi) → Model |
 
 **Navigate:** ↑/↓ or k/j to move, Enter to select, Esc to cancel
 
@@ -208,6 +210,10 @@ Run `/reload` in Pi.
 ---
 
 ## Changelog
+
+### Unreleased
+- **Fixed:** OpenAI o4 models now correctly group under OpenAI lab (added "o4" to o-series detection)
+- **Fixed:** By Lab view now shows all models directly without intermediate family selection step
 
 ### 0.2.1
 - **Fixed:** Ollama models now group with brand families instead of separate `ollama-*` families

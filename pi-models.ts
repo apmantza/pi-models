@@ -300,7 +300,7 @@ export function detectModelFamily(
 			lab: "Alibaba",
 		},
 		{
-			keywords: ["o1", "o3"],
+			keywords: ["o1", "o3", "o4"],
 			familyId: "openai-o",
 			familyName: "OpenAI o",
 			lab: "OpenAI",
@@ -749,51 +749,7 @@ async function showLabView(pi: ExtensionAPI, ctx: ExtensionContext) {
 		const lab = labs.find((l) => l.id === selectedLabId);
 		if (!lab) continue;
 
-		// Group models by family for this lab
-		const familyGroups = new Map<string, ModelInfo[]>();
-		for (const model of lab.models) {
-			const familyInfo = detectModelFamily(model);
-			const familyId = familyInfo?.familyId || "unknown";
-			const existing = familyGroups.get(familyId) ?? [];
-			existing.push(model);
-			familyGroups.set(familyId, existing);
-		}
-
-		// If lab has multiple families, show family selection
-		if (familyGroups.size > 1) {
-			const familyItems: SelectItem[] = [];
-			for (const [familyId, models] of familyGroups) {
-				const familyInfo = detectModelFamily(models[0]!);
-				familyItems.push({
-					value: familyId,
-					label: familyInfo?.familyName || familyId,
-					description: `${models.length} models`,
-				});
-			}
-			familyItems.sort((a, b) => a.label.localeCompare(b.label));
-
-			const selectedFamilyId = await showSelect(
-				ctx,
-				`🔬 ${lab.name}`,
-				familyItems,
-			);
-			if (!selectedFamilyId) continue; // Esc - back to lab list
-
-			const familyModels = familyGroups.get(selectedFamilyId);
-			if (!familyModels) continue;
-
-			const familyInfo = detectModelFamily(familyModels[0]!);
-			const selectedModelId = await showModelList(
-				ctx,
-				`🔬 ${lab.name} / ${familyInfo?.familyName || selectedFamilyId}`,
-				familyModels,
-			);
-			if (!selectedModelId) continue; // Esc - back to family list
-			await applyModelSelection(pi, ctx, selectedModelId);
-			return;
-		}
-
-		// Lab has only one family, show models directly
+		// Show all models from this lab directly (no family grouping)
 		const selectedModelId = await showModelList(
 			ctx,
 			`🔬 ${lab.name}`,
