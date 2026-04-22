@@ -115,14 +115,29 @@ export function getProviders(models: ModelInfo[]): Provider[] {
 export interface ModelFamily {
 	id: string; // Normalized family ID (e.g., "claude-sonnet")
 	displayName: string; // Human readable (e.g., "Claude Sonnet")
+	lab: string; // The lab/company that created this family
 	models: ModelInfo[]; // All models in this family
+}
+
+export interface Lab {
+	id: string; // Lab ID (e.g., "openai")
+	name: string; // Human readable (e.g., "OpenAI")
+	models: ModelInfo[];
+	families: string[]; // Family IDs this lab has models in
 }
 
 export function detectModelFamily(
 	model: ModelInfo,
-): { familyId: string; familyName: string } | null {
-	const id = model.id.toLowerCase();
+): { familyId: string; familyName: string; lab: string } | null {
+	let id = model.id.toLowerCase();
 	const name = (model.name || "").toLowerCase();
+
+	// Strip Cloudflare @cf/ prefix to get the actual model family
+	// e.g., "@cf/google/gemma" -> "google/gemma" for family detection
+	if (id.startsWith("@cf/")) {
+		id = id.slice(4); // Remove "@cf/" prefix
+	}
+
 	const fullText = `${id} ${name}`;
 
 	// Router models (gateways to free models) - group into "Other"
@@ -132,7 +147,7 @@ export function detectModelFamily(
 		/\bauto\b/.test(fullText) ||
 		id === "kilo-auto/free"
 	) {
-		return { familyId: "other", familyName: "Other" };
+		return { familyId: "other", familyName: "Other", lab: "Other" };
 	}
 
 	// Known brand keywords to check in ID and name
@@ -141,27 +156,172 @@ export function detectModelFamily(
 		keywords: string[];
 		familyId: string;
 		familyName: string;
+		lab: string;
 	}[] = [
-		{ keywords: ["claude"], familyId: "claude", familyName: "Claude" },
-		{ keywords: ["deepseek"], familyId: "deepseek", familyName: "DeepSeek" },
-		{ keywords: ["gemini"], familyId: "gemini", familyName: "Gemini" },
-		{ keywords: ["gpt"], familyId: "gpt", familyName: "GPT" },
-		{ keywords: ["llama"], familyId: "llama", familyName: "Llama" },
-		{ keywords: ["minimax"], familyId: "minimax", familyName: "MiniMax" },
-		{ keywords: ["qwen"], familyId: "qwen", familyName: "Qwen" },
-		{ keywords: ["nemotron"], familyId: "nemotron", familyName: "Nemotron" },
-		{ keywords: ["kimi", "moonshot"], familyId: "kimi", familyName: "Kimi" },
-		{ keywords: ["glm", "chatglm"], familyId: "glm", familyName: "GLM" },
-		{ keywords: ["mistral"], familyId: "mistral", familyName: "Mistral" },
-		{ keywords: ["arcee", "trinity"], familyId: "arcee", familyName: "Arcee" },
-		{ keywords: ["o1", "o3"], familyId: "openai-o", familyName: "OpenAI o" },
+		{
+			keywords: ["claude"],
+			familyId: "claude",
+			familyName: "Claude",
+			lab: "Anthropic",
+		},
+		{
+			keywords: ["deepseek"],
+			familyId: "deepseek",
+			familyName: "DeepSeek",
+			lab: "DeepSeek",
+		},
+		{
+			keywords: ["gemma"],
+			familyId: "gemma",
+			familyName: "Gemma",
+			lab: "Google",
+		},
+		{
+			keywords: ["gemini"],
+			familyId: "gemini",
+			familyName: "Gemini",
+			lab: "Google",
+		},
+		{ keywords: ["gpt"], familyId: "gpt", familyName: "GPT", lab: "OpenAI" },
+		{ keywords: ["grok"], familyId: "grok", familyName: "Grok", lab: "xAI" },
+		{
+			keywords: ["llama"],
+			familyId: "llama",
+			familyName: "Llama",
+			lab: "Meta",
+		},
+		{ keywords: ["mimo"], familyId: "mimo", familyName: "Mimo", lab: "Xiaomi" },
+		{
+			keywords: ["minimax"],
+			familyId: "minimax",
+			familyName: "MiniMax",
+			lab: "MiniMax",
+		},
+		{
+			keywords: ["qwen"],
+			familyId: "qwen",
+			familyName: "Qwen",
+			lab: "Alibaba",
+		},
+		{
+			keywords: ["nemotron"],
+			familyId: "nemotron",
+			familyName: "Nemotron",
+			lab: "NVIDIA",
+		},
+		{ keywords: ["nova"], familyId: "nova", familyName: "Nova", lab: "Amazon" },
+		{
+			keywords: ["kimi", "moonshot"],
+			familyId: "kimi",
+			familyName: "Kimi",
+			lab: "Moonshot",
+		},
+		{
+			keywords: ["glm", "chatglm"],
+			familyId: "glm",
+			familyName: "GLM",
+			lab: "Zhipu",
+		},
+		{
+			keywords: ["codestral"],
+			familyId: "codestral",
+			familyName: "Codestral",
+			lab: "Mistral",
+		},
+		{
+			keywords: ["devstral"],
+			familyId: "devstral",
+			familyName: "Devstral",
+			lab: "Mistral",
+		},
+		{
+			keywords: ["ministral"],
+			familyId: "ministral",
+			familyName: "Ministral",
+			lab: "Mistral",
+		},
+		{
+			keywords: ["mixtral"],
+			familyId: "mixtral",
+			familyName: "Mixtral",
+			lab: "Mistral",
+		},
+		{
+			keywords: ["pixtral"],
+			familyId: "pixtral",
+			familyName: "Pixtral",
+			lab: "Mistral",
+		},
+		{
+			keywords: ["saba"],
+			familyId: "saba",
+			familyName: "Saba",
+			lab: "Mistral",
+		},
+		{
+			keywords: ["mistral"],
+			familyId: "mistral",
+			familyName: "Mistral",
+			lab: "Mistral",
+		},
+		{
+			keywords: ["arcee", "trinity"],
+			familyId: "arcee",
+			familyName: "Arcee",
+			lab: "Arcee",
+		},
+		{
+			keywords: ["ernie"],
+			familyId: "ernie",
+			familyName: "Ernie",
+			lab: "Baidu",
+		},
+		{
+			keywords: ["jamba"],
+			familyId: "jamba",
+			familyName: "Jamba",
+			lab: "AI21",
+		},
+		{ keywords: ["kat"], familyId: "kat", familyName: "KAT", lab: "KAT" },
+		{ keywords: ["ling"], familyId: "ling", familyName: "Ling", lab: "Ling" },
+		{
+			keywords: ["mercury"],
+			familyId: "mercury",
+			familyName: "Mercury",
+			lab: "Inception",
+		},
+		{ keywords: ["phi"], familyId: "phi", familyName: "Phi", lab: "Microsoft" },
+		{ keywords: ["rnj"], familyId: "rnj", familyName: "RNJ", lab: "RNJ" },
+		{ keywords: ["step"], familyId: "step", familyName: "Step", lab: "Step" },
+		{
+			keywords: ["tongyi"],
+			familyId: "tongyi",
+			familyName: "Tongyi",
+			lab: "Alibaba",
+		},
+		{
+			keywords: ["o1", "o3"],
+			familyId: "openai-o",
+			familyName: "OpenAI o",
+			lab: "OpenAI",
+		},
+		{
+			keywords: ["@cf", "cloudflare"],
+			familyId: "cloudflare",
+			familyName: "Cloudflare",
+			lab: "Cloudflare",
+		},
 	];
 
 	// Check for known brands in ID or name
 	for (const mapping of brandMappings) {
 		for (const keyword of mapping.keywords) {
 			if (fullText.includes(keyword)) {
-				return { familyId: mapping.familyId, familyName: mapping.familyName };
+				return {
+					familyId: mapping.familyId,
+					familyName: mapping.familyName,
+					lab: mapping.lab,
+				};
 			}
 		}
 	}
@@ -169,14 +329,14 @@ export function detectModelFamily(
 	// Provider-specific fallbacks for models without brand in ID/name
 	const providerMappings: Record<
 		string,
-		{ familyId: string; familyName: string }
+		{ familyId: string; familyName: string; lab: string }
 	> = {
-		minimax: { familyId: "minimax", familyName: "MiniMax" },
-		minimaxai: { familyId: "minimax", familyName: "MiniMax" },
-		deepseek: { familyId: "deepseek", familyName: "DeepSeek" },
-		nvidia: { familyId: "nemotron", familyName: "Nemotron" },
-		moonshot: { familyId: "kimi", familyName: "Kimi" },
-		zhipu: { familyId: "glm", familyName: "GLM" },
+		minimax: { familyId: "minimax", familyName: "MiniMax", lab: "MiniMax" },
+		minimaxai: { familyId: "minimax", familyName: "MiniMax", lab: "MiniMax" },
+		deepseek: { familyId: "deepseek", familyName: "DeepSeek", lab: "DeepSeek" },
+		nvidia: { familyId: "nemotron", familyName: "Nemotron", lab: "NVIDIA" },
+		moonshot: { familyId: "kimi", familyName: "Kimi", lab: "Moonshot" },
+		zhipu: { familyId: "glm", familyName: "GLM", lab: "Zhipu" },
 	};
 
 	if (providerMappings[model.provider]) {
@@ -186,7 +346,7 @@ export function detectModelFamily(
 	// Helper function to check if any part matches a brand keyword
 	function findBrandInParts(
 		parts: string[],
-	): { familyId: string; familyName: string } | null {
+	): { familyId: string; familyName: string; lab: string } | null {
 		for (const part of parts) {
 			for (const mapping of brandMappings) {
 				for (const keyword of mapping.keywords) {
@@ -194,6 +354,7 @@ export function detectModelFamily(
 						return {
 							familyId: mapping.familyId,
 							familyName: mapping.familyName,
+							lab: mapping.lab,
 						};
 					}
 				}
@@ -213,7 +374,11 @@ export function detectModelFamily(
 		for (const mapping of brandMappings) {
 			for (const keyword of mapping.keywords) {
 				if (name.includes(keyword)) {
-					return { familyId: mapping.familyId, familyName: mapping.familyName };
+					return {
+						familyId: mapping.familyId,
+						familyName: mapping.familyName,
+						lab: mapping.lab,
+					};
 				}
 			}
 		}
@@ -239,6 +404,7 @@ export function detectModelFamily(
 			return {
 				familyId: firstPart,
 				familyName: firstPart.charAt(0).toUpperCase() + firstPart.slice(1),
+				lab: firstPart.charAt(0).toUpperCase() + firstPart.slice(1),
 			};
 		}
 	}
@@ -258,6 +424,7 @@ export function detectModelFamily(
 				return {
 					familyId: part,
 					familyName: part.charAt(0).toUpperCase() + part.slice(1),
+					lab: part.charAt(0).toUpperCase() + part.slice(1),
 				};
 			}
 		}
@@ -267,6 +434,7 @@ export function detectModelFamily(
 		familyId: firstPart || id,
 		familyName:
 			(firstPart || id).charAt(0).toUpperCase() + (firstPart || id).slice(1),
+		lab: (firstPart || id).charAt(0).toUpperCase() + (firstPart || id).slice(1),
 	};
 }
 
@@ -340,6 +508,7 @@ export function getModelFamilies(models: ModelInfo[]): ModelFamily[] {
 		families.push({
 			id,
 			displayName: familyInfo.familyName,
+			lab: familyInfo.lab,
 			models: models.sort(
 				(a, b) =>
 					a.provider.localeCompare(b.provider) || b.id.localeCompare(a.id),
@@ -348,6 +517,37 @@ export function getModelFamilies(models: ModelInfo[]): ModelFamily[] {
 	}
 
 	return families.sort((a, b) => a.displayName.localeCompare(b.displayName));
+}
+
+export function getLabs(models: ModelInfo[]): Lab[] {
+	const byLab = new Map<
+		string,
+		{ models: ModelInfo[]; families: Set<string> }
+	>();
+
+	for (const model of models) {
+		const familyInfo = detectModelFamily(model);
+		const lab = familyInfo?.lab || "Unknown";
+		const labId = lab.toLowerCase().replace(/\s+/g, "-");
+
+		const existing = byLab.get(labId) ?? { models: [], families: new Set() };
+		existing.models.push(model);
+		if (familyInfo) {
+			existing.families.add(familyInfo.familyId);
+		}
+		byLab.set(labId, existing);
+	}
+
+	const labs: Lab[] = [];
+	for (const [id, data] of byLab) {
+		labs.push({
+			id,
+			name: data.models[0] ? detectModelFamily(data.models[0])?.lab || id : id,
+			models: data.models.sort((a, b) => a.id.localeCompare(b.id)),
+			families: [...data.families],
+		});
+	}
+	return labs.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 async function applyModelSelection(
@@ -395,6 +595,11 @@ async function showModelsBrowser(pi: ExtensionAPI, ctx: ExtensionContext) {
 			description: "Browse by provider (OpenAI, Anthropic, etc.)",
 		},
 		{
+			value: "lab",
+			label: "🔬 By Lab",
+			description: "Browse by lab/company (Meta, OpenAI, etc.)",
+		},
+		{
 			value: "family",
 			label: "🏷️ By Model Family",
 			description: "Browse by model type (GPT-4, Claude, etc.)",
@@ -406,6 +611,8 @@ async function showModelsBrowser(pi: ExtensionAPI, ctx: ExtensionContext) {
 
 	if (browseMode === "provider") {
 		await showProviderView(pi, ctx);
+	} else if (browseMode === "lab") {
+		await showLabView(pi, ctx);
 	} else {
 		await showFamilyView(pi, ctx);
 	}
@@ -481,6 +688,118 @@ async function showFamilyView(pi: ExtensionAPI, ctx: ExtensionContext) {
 			family.models,
 		);
 		if (!selectedModelId) continue; // Esc - back to family list
+		await applyModelSelection(pi, ctx, selectedModelId);
+		return;
+	}
+}
+
+async function showLabView(pi: ExtensionAPI, ctx: ExtensionContext) {
+	while (true) {
+		const allModels = getAvailableModels(ctx);
+		const labs = getLabs(allModels);
+		const freeModels = allModels.filter((m) => m.isFree);
+
+		// Level 1: Lab selection
+		const labItems: SelectItem[] = [
+			{
+				value: "__free",
+				label: "🆓 Free Models",
+				description: `${freeModels.length} models`,
+			},
+		];
+		for (const lab of labs) {
+			const familyCount = lab.families.length;
+			const desc =
+				familyCount > 1
+					? `${lab.models.length} models (${familyCount} families)`
+					: `${lab.models.length} models`;
+			labItems.push({ value: lab.id, label: lab.name, description: desc });
+		}
+
+		const selectedLabId = await showSelect(
+			ctx,
+			"🔬 Labs",
+			labItems,
+			() => "__toggle", // Return toggle sentinel on Tab
+		);
+		if (!selectedLabId) {
+			await showModelsBrowser(pi, ctx);
+			return;
+		}
+
+		// Handle toggle to provider view
+		if (selectedLabId === "__toggle") {
+			await showProviderView(pi, ctx);
+			return;
+		}
+
+		// Handle free models
+		if (selectedLabId === "__free") {
+			const selectedModelId = await showModelList(
+				ctx,
+				"🆓 Free Models",
+				freeModels,
+			);
+			if (!selectedModelId) continue; // Esc - back to lab list
+			await applyModelSelection(pi, ctx, selectedModelId);
+			return;
+		}
+
+		// Find selected lab
+		const lab = labs.find((l) => l.id === selectedLabId);
+		if (!lab) continue;
+
+		// Group models by family for this lab
+		const familyGroups = new Map<string, ModelInfo[]>();
+		for (const model of lab.models) {
+			const familyInfo = detectModelFamily(model);
+			const familyId = familyInfo?.familyId || "unknown";
+			const existing = familyGroups.get(familyId) ?? [];
+			existing.push(model);
+			familyGroups.set(familyId, existing);
+		}
+
+		// If lab has multiple families, show family selection
+		if (familyGroups.size > 1) {
+			const familyItems: SelectItem[] = [];
+			for (const [familyId, models] of familyGroups) {
+				const familyInfo = detectModelFamily(models[0]!);
+				familyItems.push({
+					value: familyId,
+					label: familyInfo?.familyName || familyId,
+					description: `${models.length} models`,
+				});
+			}
+			familyItems.sort((a, b) => a.label.localeCompare(b.label));
+
+			const selectedFamilyId = await showSelect(
+				ctx,
+				`🔬 ${lab.name}`,
+				familyItems,
+			);
+			if (!selectedFamilyId) continue; // Esc - back to lab list
+
+			const familyModels = familyGroups.get(selectedFamilyId);
+			if (!familyModels) continue;
+
+			const familyInfo = detectModelFamily(familyModels[0]!);
+			const selectedModelId = await showModelList(
+				ctx,
+				`🔬 ${lab.name} / ${familyInfo?.familyName || selectedFamilyId}`,
+				familyModels,
+			);
+			if (!selectedModelId) continue; // Esc - back to family list
+			await applyModelSelection(pi, ctx, selectedModelId);
+			return;
+		}
+
+		// Lab has only one family, show models directly
+		const selectedModelId = await showModelList(
+			ctx,
+			`🔬 ${lab.name}`,
+			lab.models,
+		);
+		if (!selectedModelId) continue; // Esc - back to lab list
 		await applyModelSelection(pi, ctx, selectedModelId);
 		return;
 	}
@@ -616,7 +935,7 @@ async function showSelect(
 		},
 		{
 			overlay: true,
-			overlayOptions: { width: "80%", minWidth: 50, anchor: "center" },
+			overlayOptions: { width: "40%", minWidth: 30, anchor: "center" },
 		},
 	);
 }
@@ -760,7 +1079,7 @@ async function showModelList(
 		},
 		{
 			overlay: true,
-			overlayOptions: { width: "95%", minWidth: 80, anchor: "center" },
+			overlayOptions: { width: "50%", minWidth: 40, anchor: "center" },
 		},
 	);
 }
