@@ -2,13 +2,22 @@
 
 All notable changes to the Pi Models extension.
 
+## [Unreleased]
+
+## [0.2.3] - 2026-04-24
+
+### Added
+- **New model families:** Added support for Hermes, Hy3, Lyria, and Qianfan model families.
+- **Provider count in family view:** Shows how many providers offer each model family in the "By Model Family" view.
+
+### Changed
+- **Auto-resizing overlays:** Overlay screens now automatically resize to fit content width, preventing truncation of long model names.
+
 ## [0.2.2] - 2025-04-23
 
 ### Fixed
 - **OpenAI o4 detection:** Added "o4" to the o-series keywords so models like "o4-mini" correctly group under the OpenAI lab instead of creating spurious lab entries.
 - **By Lab view flow:** Removed the intermediate family selection step when browsing by lab. Now shows all models from the selected lab directly. Users who want family filtering can use "By Model Family" view instead.
-
-## [Unreleased]
 
 ## [0.2.1] - 2025-04-03
 
@@ -52,6 +61,8 @@ All notable changes to the Pi Models extension.
 
 ---
 
+[0.2.3]: https://github.com/apmantza/pi-models/compare/v0.2.2...v0.2.3
+[0.2.2]: https://github.com/apmantza/pi-models/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/apmantza/pi-models/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/apmantza/pi-models/releases/tag/v0.2.0
 [0.1.0]: https://github.com/apmantza/pi-models/releases/tag/v0.1.0

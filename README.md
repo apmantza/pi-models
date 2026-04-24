@@ -111,6 +111,10 @@ The extension automatically categorizes models using pattern matching on model I
 | **Nemotron** | `nemotron` | `nemotron-4-340b`, `nemotron-3-super` |
 | **Mistral** | `mistral` | `mistral-large-3`, `mistral-small` |
 | **Arcee** | `arcee` or `trinity` | `trinity-large-preview`, `arcee-ai/trinity-mini` |
+| **Hermes** | `hermes` | `hermes-2-pro`, `hermes-3-llama` |
+| **Hy3** | `hy3` | `hy3-70b`, `hy3-lite` |
+| **Lyria** | `lyria` | `lyria-1`, `lyria-v2` |
+| **Qianfan** | `qianfan` | `qianfan-chat`, `qianfan-ernie` |
 | **Other** | `router`, `auto` | Router models grouped separately |
 
 **Multi-Provider Grouping:** Models with the same name from different providers (e.g., `Trinity Large Preview` from zen, kilo, cline) are automatically merged into the same family.
@@ -212,6 +216,13 @@ Run `/reload` in Pi.
 ## Changelog
 
 ### Unreleased
+
+### 0.2.3
+- **New:** Hermes, Hy3, Lyria, and Qianfan model family support
+- **New:** Provider count shown in "By Model Family" view (e.g., "Claude Sonnet (3)")
+- **Improved:** Overlay screens auto-resize to fit content width
+
+### 0.2.2
 - **Fixed:** OpenAI o4 models now correctly group under OpenAI lab (added "o4" to o-series detection)
 - **Fixed:** By Lab view now shows all models directly without intermediate family selection step
 
