@@ -182,8 +182,20 @@ export function detectModelFamily(
 			familyName: "Gemini",
 			lab: "Google",
 		},
+		{
+			keywords: ["lyria"],
+			familyId: "lyria",
+			familyName: "Lyria",
+			lab: "Google",
+		},
 		{ keywords: ["gpt"], familyId: "gpt", familyName: "GPT", lab: "OpenAI" },
 		{ keywords: ["grok"], familyId: "grok", familyName: "Grok", lab: "xAI" },
+		{
+			keywords: ["hy3"],
+			familyId: "hy3",
+			familyName: "Hy3",
+			lab: "Tencent",
+		},
 		{
 			keywords: ["llama"],
 			familyId: "llama",
@@ -196,6 +208,12 @@ export function detectModelFamily(
 			familyId: "minimax",
 			familyName: "MiniMax",
 			lab: "MiniMax",
+		},
+		{
+			keywords: ["qianfan"],
+			familyId: "qianfan",
+			familyName: "Qianfan",
+			lab: "Baidu",
 		},
 		{
 			keywords: ["qwen"],
@@ -269,6 +287,12 @@ export function detectModelFamily(
 			familyId: "arcee",
 			familyName: "Arcee",
 			lab: "Arcee",
+		},
+		{
+			keywords: ["hermes"],
+			familyId: "hermes",
+			familyName: "Hermes",
+			lab: "Nous Research",
 		},
 		{
 			keywords: ["ernie"],
@@ -628,7 +652,7 @@ async function showFamilyView(pi: ExtensionAPI, ctx: ExtensionContext) {
 			const providers = [...new Set(f.models.map((m) => m.provider))];
 			const providerDesc =
 				providers.length > 1
-					? `Available from ${providers.join(", ")} (${f.models.length} versions)`
+					? `Available from ${providers.length} providers (${f.models.length} versions)`
 					: `From ${providers[0]} (${f.models.length} versions)`;
 
 			return {
