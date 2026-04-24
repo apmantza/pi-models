@@ -836,6 +836,58 @@ async function showProviderView(pi: ExtensionAPI, ctx: ExtensionContext) {
 // Helper to add Greek flag blue background color to text (RGB: 0, 20, 137)
 const bgColor = (text: string): string => `\x1b[48;2;0;20;137m${text}\x1b[0m`;
 
+// Helper to calculate optimal width for SelectList content
+function calculateSelectWidth(
+	items: SelectItem[],
+	title: string,
+	onToggle: boolean,
+): number {
+	const prefixWidth = 2; // "→ " or "  "
+	const primaryGap = 2; // PRIMARY_COLUMN_GAP
+	const boxPadding = 2; // Box paddingX=1 on each side
+	const safetyMargin = 2; // Extra breathing room
+
+	// Calculate max label width
+	const maxLabelWidth = Math.max(
+		...items.map((item) => visibleWidth(item.label)),
+		visibleWidth(title),
+	);
+
+	// Calculate max description width (if any items have descriptions)
+	const itemsWithDesc = items.filter((i) => i.description);
+	const maxDescWidth =
+		itemsWithDesc.length > 0
+			? Math.max(...itemsWithDesc.map((i) => visibleWidth(i.description || "")))
+			: 0;
+
+	// Calculate help text width
+	const helpText = onToggle
+		? "↑↓ navigate • enter select • esc back • tab toggle view"
+		: "↑↓ navigate • enter select • esc back";
+	const helpWidth = visibleWidth(helpText);
+
+	// If we have descriptions, use two-column layout width
+	let contentWidth: number;
+	if (maxDescWidth > 0) {
+		// Two-column: prefix + primary column + gap + description
+		contentWidth =
+			prefixWidth + Math.max(maxLabelWidth + primaryGap, 20) + maxDescWidth;
+	} else {
+		// Single column: prefix + label
+		contentWidth = prefixWidth + maxLabelWidth;
+	}
+
+	// Total width includes box padding and safety margin
+	const totalWidth = Math.max(
+		contentWidth + boxPadding + safetyMargin,
+		helpWidth + boxPadding,
+		40, // minimum reasonable width
+	);
+
+	// Cap at 120 columns max
+	return Math.min(totalWidth, 120);
+}
+
 // Level 1: Uses SelectList for provider selection (has descriptions, needs columns)
 async function showSelect(
 	ctx: ExtensionContext,
@@ -843,6 +895,9 @@ async function showSelect(
 	items: SelectItem[],
 	onToggle?: () => string | null,
 ): Promise<string | null> {
+	// Calculate optimal width based on content
+	const optimalWidth = calculateSelectWidth(items, title, !!onToggle);
+
 	return ctx.ui.custom<string | null>(
 		(_tui, theme, _kb, done) => {
 			const box = new Box(1, 1, bgColor);
@@ -891,9 +946,69 @@ async function showSelect(
 		},
 		{
 			overlay: true,
-			overlayOptions: { width: "40%", minWidth: 30, anchor: "center" },
+			overlayOptions: { width: optimalWidth, anchor: "center" },
 		},
 	);
+}
+
+// Helper to calculate optimal width for model list content
+function calculateModelListWidth(
+	models: ModelInfo[],
+	title: string,
+	activeModelId: string | undefined,
+): number {
+	const prefixWidth = 2; // "→ " or "  "
+	const activeIndicator = " ● active";
+	const activeIndicatorWidth = visibleWidth(activeIndicator);
+	const boxPadding = 2; // Box paddingX=1 on each side
+	const safetyMargin = 2; // Extra breathing room
+
+	// Check if we have multiple providers
+	const providers = [...new Set(models.map((m) => m.provider))];
+	const showProviders = providers.length > 1;
+
+	// Calculate max display name width
+	const maxNameWidth = Math.max(
+		...models.map((model) => {
+			let displayName = formatModelName(model);
+			if (showProviders) {
+				const providerLower = model.provider.toLowerCase();
+				const nameLower = displayName.toLowerCase();
+				if (
+					nameLower.startsWith(`${providerLower} `) ||
+					nameLower.startsWith(`${providerLower}-`)
+				) {
+					displayName = displayName.slice(model.provider.length + 1).trim();
+				}
+				displayName = `[${model.provider}] ${displayName}`;
+			}
+			return visibleWidth(displayName);
+		}),
+		visibleWidth(title),
+	);
+
+	// Check if any model is active (needs extra space for indicator)
+	const hasActive = models.some((m) => m.id === activeModelId);
+
+	// Total width: prefix + name + optional active indicator + box padding + safety
+	const contentWidth =
+		prefixWidth + maxNameWidth + (hasActive ? activeIndicatorWidth : 0);
+
+	// Scroll indicator width (e.g., "  15/30")
+	const scrollWidth =
+		models.length > 15
+			? visibleWidth(`  ${models.length}/${models.length}`)
+			: 0;
+
+	const totalWidth = Math.max(
+		contentWidth + boxPadding + safetyMargin,
+		scrollWidth + boxPadding,
+		visibleWidth("↑↓ navigate • enter select • esc back") + boxPadding,
+		40, // minimum reasonable width
+	);
+
+	// Cap at 120 columns max
+	return Math.min(totalWidth, 120);
 }
 
 // Level 2: Custom model list without column constraints (no truncation)
@@ -902,6 +1017,9 @@ async function showModelList(
 	title: string,
 	models: ModelInfo[],
 ): Promise<string | null> {
+	// Calculate optimal width based on content
+	const optimalWidth = calculateModelListWidth(models, title, ctx.model?.id);
+
 	return ctx.ui.custom<string | null>(
 		(_tui, theme, _kb, done) => {
 			const state = {
@@ -1035,7 +1153,7 @@ async function showModelList(
 		},
 		{
 			overlay: true,
-			overlayOptions: { width: "50%", minWidth: 40, anchor: "center" },
+			overlayOptions: { width: optimalWidth, anchor: "center" },
 		},
 	);
 }
