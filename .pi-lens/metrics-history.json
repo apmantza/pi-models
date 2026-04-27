@@ -40,12 +40,14 @@
     },
     "pi-models.ts": {
       "latest": {
-        "commit": "unknown",
-        "timestamp": "2026-03-31T23:02:30.726Z",
-        "mi": 22,
-        "cognitive": 140,
+        "commit": "aee7d5b",
+        "timestamp": "2026-04-27T05:44:40.640Z",
+        "mi": 10.3,
+        "cognitive": 370,
         "nesting": 7,
-        "lines": 287
+        "lines": 990,
+        "maxCyclomatic": 64,
+        "entropy": 6.87
       },
       "history": [
         {
@@ -103,10 +105,40 @@
           "cognitive": 140,
           "nesting": 7,
           "lines": 287
+        },
+        {
+          "commit": "1e6d5d7",
+          "timestamp": "2026-04-24T07:35:25.892Z",
+          "mi": 11,
+          "cognitive": 351,
+          "nesting": 7,
+          "lines": 883,
+          "maxCyclomatic": 64,
+          "entropy": 6.8
+        },
+        {
+          "commit": "3ecff52",
+          "timestamp": "2026-04-24T07:49:45.984Z",
+          "mi": 10.7,
+          "cognitive": 370,
+          "nesting": 7,
+          "lines": 966,
+          "maxCyclomatic": 64,
+          "entropy": 6.9
+        },
+        {
+          "commit": "aee7d5b",
+          "timestamp": "2026-04-27T05:44:40.640Z",
+          "mi": 10.3,
+          "cognitive": 370,
+          "nesting": 7,
+          "lines": 990,
+          "maxCyclomatic": 64,
+          "entropy": 6.87
         }
       ],
       "trend": "regressing"
     }
   },
-  "capturedAt": "2026-03-31T23:02:51.937Z"
+  "capturedAt": "2026-04-27T05:44:45.651Z"
 }

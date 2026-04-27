@@ -986,6 +986,7 @@ function calculateModelListWidth(
 	const activeIndicatorWidth = visibleWidth(activeIndicator);
 	const boxPadding = 2; // Box paddingX=1 on each side
 	const safetyMargin = 2; // Extra breathing room
+	const codingIndexWidth = 8; // Buffer for " (XX.X)" score appended by other extensions
 
 	// Check if we have multiple providers
 	const providers = [...new Set(models.map((m) => m.provider))];
@@ -1014,9 +1015,12 @@ function calculateModelListWidth(
 	// Check if any model is active (needs extra space for indicator)
 	const hasActive = models.some((m) => m.id === activeModelId);
 
-	// Total width: prefix + name + optional active indicator + box padding + safety
+	// Total width: prefix + name + coding index score + optional active indicator + box padding + safety
 	const contentWidth =
-		prefixWidth + maxNameWidth + (hasActive ? activeIndicatorWidth : 0);
+		prefixWidth +
+		maxNameWidth +
+		codingIndexWidth +
+		(hasActive ? activeIndicatorWidth : 0);
 
 	// Scroll indicator width (e.g., "  15/30")
 	const scrollWidth =

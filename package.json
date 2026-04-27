@@ -1,6 +1,6 @@
 {
 	"name": "pi-models",
-	"version": "0.2.3",
+	"version": "0.2.4",
 	"description": "Quality-of-life Pi extension for browsing models by provider or family",
 	"main": "pi-models.ts",
 	"keywords": [
