@@ -476,7 +476,7 @@ function normalizeModelName(name: string): string {
 			.replace(/\s*\(cline\)\s*$/i, "")
 			.replace(/\s*\(ci:\s*[\d.]+\)\s*$/i, "") // CI scores like [CI: 29.2]
 			.replace(/\s*\[ci:\s*[\d.]+\]\s*$/i, "")
-			.replace(/\s*\([^)]*\)\s*$/g, "") // Remove any trailing parenthetical
+			.replace(/\([^)]*\)\s*$/g, "") // Remove any trailing parenthetical (leading space cleaned by .trim() below)
 			.trim()
 	);
 }
@@ -873,7 +873,7 @@ function calculateSelectWidth(
 
 	// Calculate max label width
 	const maxLabelWidth = Math.max(
-		...items.map((item) => visibleWidth(item.label)),
+		...items.map((item) => visibleWidth(item.label ?? "")),
 		visibleWidth(title),
 	);
 

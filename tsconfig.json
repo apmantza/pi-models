@@ -9,5 +9,5 @@
 		"forceConsistentCasingInFileNames": true,
 		"noEmit": true
 	},
-	"include": ["pi-models.ts", "tests/**/*.ts"]
+	"include": ["pi-models.ts", "types.d.ts", "tests/**/*.ts"]
 }
