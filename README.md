@@ -41,11 +41,11 @@ First, pick how you want to browse:
   🏷️ By Model Family     ← Browse family → provider → model
 ```
 
-| Mode | Best For | Flow |
-|------|----------|------|
-| **By Provider** | When you know which provider hosts the model | Provider → Model |
-| **By Lab** | When you want to see all models from a specific lab/company | Lab → All Models |
-| **By Model Family** | When you know the model type and want family filtering | Family → Provider (if multi) → Model |
+| Mode                | Best For                                                    | Flow                                 |
+| ------------------- | ----------------------------------------------------------- | ------------------------------------ |
+| **By Provider**     | When you know which provider hosts the model                | Provider → Model                     |
+| **By Lab**          | When you want to see all models from a specific lab/company | Lab → All Models                     |
+| **By Model Family** | When you know the model type and want family filtering      | Family → Provider (if multi) → Model |
 
 **Navigate:** ↑/↓ or k/j to move, Enter to select, Esc to cancel
 
@@ -97,25 +97,36 @@ After selection, Pi immediately switches to that model:
 
 The extension automatically categorizes models using pattern matching on model IDs and names:
 
-| Family | Pattern | Example IDs Matched |
-|--------|---------|---------------------|
-| **Claude** | `claude` | `claude-opus-4`, `claude-sonnet-3.5`, `claude-haiku-3` |
-| **GPT** | `gpt` | `gpt-4o`, `gpt-4-turbo`, `gpt-3.5-turbo`, `o1-preview` |
-| **Gemini** | `gemini` | `gemini-1.5-pro`, `gemini-1.5-flash`, `gemini-ultra` |
-| **Llama** | `llama` | `llama3.2`, `llama-3.3-70b`, `codellama-70b` |
-| **DeepSeek** | `deepseek` | `deepseek-chat`, `deepseek-r1` |
-| **Qwen** | `qwen` | `qwen3.5-397b`, `qwen3-coder`, `qwen3-vl` |
-| **MiniMax** | `minimax` | `minimax-m2.5`, `minimax-m2` |
-| **Kimi** | `kimi` or `moonshot` | `kimi-k2.5`, `moonshot-v1-32k` |
-| **GLM** | `glm` or `chatglm` | `glm-4.7`, `glm-5`, `chatglm3` |
-| **Nemotron** | `nemotron` | `nemotron-4-340b`, `nemotron-3-super` |
-| **Mistral** | `mistral` | `mistral-large-3`, `mistral-small` |
-| **Arcee** | `arcee` or `trinity` | `trinity-large-preview`, `arcee-ai/trinity-mini` |
-| **Hermes** | `hermes` | `hermes-2-pro`, `hermes-3-llama` |
-| **Hy3** | `hy3` | `hy3-70b`, `hy3-lite` |
-| **Lyria** | `lyria` | `lyria-1`, `lyria-v2` |
-| **Qianfan** | `qianfan` | `qianfan-chat`, `qianfan-ernie` |
-| **Other** | `router`, `auto` | Router models grouped separately |
+| Family           | Pattern              | Example IDs Matched                                      |
+| ---------------- | -------------------- | -------------------------------------------------------- |
+| **ByteDance**    | `bytedance`          | `bytedance-doubao`, `bytedance-seed`                     |
+| **Claude**       | `claude`             | `claude-opus-4`, `claude-sonnet-3.5`, `claude-haiku-3`   |
+| **Cohere**       | `cohere`             | `cohere-command`, `cohere-embed`                         |
+| **Command**      | `command`            | `command-r-plus`, `command-r`, `command-light`           |
+| **Doubao**       | `doubao`             | `doubao-pro-32k`, `doubao-lite-128k`, `bytedance-doubao` |
+| **GPT**          | `gpt`                | `gpt-4o`, `gpt-4-turbo`, `gpt-3.5-turbo`, `o1-preview`   |
+| **Gemini**       | `gemini`             | `gemini-1.5-pro`, `gemini-1.5-flash`, `gemini-ultra`     |
+| **Llama**        | `llama`              | `llama3.2`, `llama-3.3-70b`, `codellama-70b`             |
+| **DeepSeek**     | `deepseek`           | `deepseek-chat`, `deepseek-r1`                           |
+| **Qwen**         | `qwen`               | `qwen3.5-397b`, `qwen3-coder`, `qwen3-vl`                |
+| **MiniMax**      | `minimax`            | `minimax-m2.5`, `minimax-m2`                             |
+| **Kimi**         | `kimi` or `moonshot` | `kimi-k2.5`, `moonshot-v1-32k`                           |
+| **GLM**          | `glm` or `chatglm`   | `glm-4.7`, `glm-5`, `chatglm3`                           |
+| **Nemotron**     | `nemotron`           | `nemotron-4-340b`, `nemotron-3-super`                    |
+| **Mistral**      | `mistral`            | `mistral-large-3`, `mistral-small`                       |
+| **Arcee**        | `arcee` or `trinity` | `trinity-large-preview`, `arcee-ai/trinity-mini`         |
+| **Hermes**       | `hermes`             | `hermes-2-pro`, `hermes-3-llama`                         |
+| **Hy3**          | `hy3`                | `hy3-70b`, `hy3-lite`                                    |
+| **Inclusion AI** | `inclusion`          | `inclusion-ling`, `inclusion-llada2`, `inclusion-ring`   |
+| **Laguna**       | `laguna`             | `laguna-3b`, `laguna-7b`, `poolside-laguna`              |
+| **Ling**         | `ling`               | `ling-1`, `ling-v2`, `inclusion-ling`                    |
+| **Llada2**       | `llada`              | `llada2-7b`, `llada2-13b`, `inclusion-llada2`            |
+| **Lyria**        | `lyria`              | `lyria-1`, `lyria-v2`                                    |
+| **Ring**         | `ring`               | `ring-1`, `ring-v2`, `inclusion-ring`                    |
+| **Laguna**       | `laguna`             | `laguna-3b`, `laguna-7b`, `poolside-laguna`              |
+| **Poolside**     | `poolside`           | `poolside-laguna`, `poolside-assist`                     |
+| **Qianfan**      | `qianfan`            | `qianfan-chat`, `qianfan-ernie`                          |
+| **Other**        | `router`, `auto`     | Router models grouped separately                         |
 
 **Multi-Provider Grouping:** Models with the same name from different providers (e.g., `Trinity Large Preview` from zen, kilo, cline) are automatically merged into the same family.
 
@@ -145,13 +156,13 @@ npm run typecheck
 
 ### Test Coverage
 
-| Function | Tests |
-|----------|-------|
-| `isModelFree()` | 5 tests - cost checking edge cases |
-| `formatModelName()` | 3 tests - name vs ID handling |
-| `getProviders()` | 5 tests - grouping, sorting, free counting |
+| Function              | Tests                                                                 |
+| --------------------- | --------------------------------------------------------------------- |
+| `isModelFree()`       | 5 tests - cost checking edge cases                                    |
+| `formatModelName()`   | 3 tests - name vs ID handling                                         |
+| `getProviders()`      | 5 tests - grouping, sorting, free counting                            |
 | `detectModelFamily()` | 42 tests - all model family patterns, ollama, routers, multi-provider |
-| `getModelFamilies()` | 5 tests - grouping, sorting, name-based merging |
+| `getModelFamilies()`  | 5 tests - grouping, sorting, name-based merging                       |
 
 **Total: 60 tests** covering all major functionality and edge cases.
 
@@ -198,11 +209,11 @@ Run `/reload` in Pi.
 
 ## Controls Reference
 
-| Key | Action |
-|-----|--------|
-| `↑` / `↓` or `k` / `j` | Navigate up/down |
-| `Enter` | Select highlighted item |
-| `Esc` | Go back to previous level / close browser |
+| Key                    | Action                                    |
+| ---------------------- | ----------------------------------------- |
+| `↑` / `↓` or `k` / `j` | Navigate up/down                          |
+| `Enter`                | Select highlighted item                   |
+| `Esc`                  | Go back to previous level / close browser |
 
 ---
 
@@ -218,15 +229,18 @@ Run `/reload` in Pi.
 ### Unreleased
 
 ### 0.2.3
+
 - **New:** Hermes, Hy3, Lyria, and Qianfan model family support
 - **New:** Provider count shown in "By Model Family" view (e.g., "Claude Sonnet (3)")
 - **Improved:** Overlay screens auto-resize to fit content width
 
 ### 0.2.2
+
 - **Fixed:** OpenAI o4 models now correctly group under OpenAI lab (added "o4" to o-series detection)
 - **Fixed:** By Lab view now shows all models directly without intermediate family selection step
 
 ### 0.2.1
+
 - **Fixed:** Ollama models now group with brand families instead of separate `ollama-*` families
 - **New:** Name-based family merging - models with same name from different providers auto-merge
 - **New:** Arcee/Trinity model family support
@@ -235,6 +249,7 @@ Run `/reload` in Pi.
 - **New:** Complete test suite (60 tests)
 
 ### 0.2.0
+
 - **New:** Browse mode selection (By Provider / By Model Family)
 - **New:** Automatic model family detection with heuristic pattern matching
 - **New:** Multi-provider selection for same model families (e.g., Claude from Anthropic/AWS/Vertex)
@@ -243,6 +258,7 @@ Run `/reload` in Pi.
 - **Improved:** Free Models accessible in both browse views
 
 ### 0.1.0
+
 - Initial release
 - Two-level provider → model browsing
 - Free models virtual provider

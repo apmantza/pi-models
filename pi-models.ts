@@ -159,16 +159,40 @@ export function detectModelFamily(
 		lab: string;
 	}[] = [
 		{
+			keywords: ["bytedance"],
+			familyId: "bytedance",
+			familyName: "ByteDance",
+			lab: "ByteDance",
+		},
+		{
 			keywords: ["claude"],
 			familyId: "claude",
 			familyName: "Claude",
 			lab: "Anthropic",
 		},
 		{
+			keywords: ["cohere"],
+			familyId: "cohere",
+			familyName: "Cohere",
+			lab: "Cohere",
+		},
+		{
+			keywords: ["command"],
+			familyId: "command",
+			familyName: "Command",
+			lab: "Cohere",
+		},
+		{
 			keywords: ["deepseek"],
 			familyId: "deepseek",
 			familyName: "DeepSeek",
 			lab: "DeepSeek",
+		},
+		{
+			keywords: ["doubao"],
+			familyId: "doubao",
+			familyName: "Doubao",
+			lab: "ByteDance",
 		},
 		{
 			keywords: ["gemma"],
@@ -306,8 +330,37 @@ export function detectModelFamily(
 			familyName: "Jamba",
 			lab: "AI21",
 		},
+		{
+			keywords: ["laguna"],
+			familyId: "laguna",
+			familyName: "Laguna",
+			lab: "Poolside",
+		},
 		{ keywords: ["kat"], familyId: "kat", familyName: "KAT", lab: "KAT" },
-		{ keywords: ["ling"], familyId: "ling", familyName: "Ling", lab: "Ling" },
+		{
+			keywords: ["inclusion"],
+			familyId: "inclusion",
+			familyName: "Inclusion AI",
+			lab: "Inclusion AI",
+		},
+		{
+			keywords: ["ling"],
+			familyId: "ling",
+			familyName: "Ling",
+			lab: "Inclusion AI",
+		},
+		{
+			keywords: ["llada"],
+			familyId: "llada2",
+			familyName: "Llada2",
+			lab: "Inclusion AI",
+		},
+		{
+			keywords: ["ring"],
+			familyId: "ring",
+			familyName: "Ring",
+			lab: "Inclusion AI",
+		},
 		{
 			keywords: ["mercury"],
 			familyId: "mercury",
@@ -315,6 +368,12 @@ export function detectModelFamily(
 			lab: "Inception",
 		},
 		{ keywords: ["phi"], familyId: "phi", familyName: "Phi", lab: "Microsoft" },
+		{
+			keywords: ["poolside"],
+			familyId: "poolside",
+			familyName: "Poolside",
+			lab: "Poolside",
+		},
 		{ keywords: ["rnj"], familyId: "rnj", familyName: "RNJ", lab: "RNJ" },
 		{ keywords: ["step"], familyId: "step", familyName: "Step", lab: "Step" },
 		{
