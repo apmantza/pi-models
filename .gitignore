@@ -13,3 +13,6 @@ Thumbs.db
 
 # Pi local state
 .pi-lens/
+
+# npm pack artifacts
+*.tgz
