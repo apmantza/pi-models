@@ -6,7 +6,7 @@
 
 **Architecture:** Three-level menu system (Browse Mode → Category → Selection) using Pi's built-in SelectList and custom components with dynamic width calculation
 
-**Tech Stack:** TypeScript, @mariozechner/pi-tui (SelectList, Container, Text), @mariozechner/pi-coding-agent ExtensionAPI
+**Tech Stack:** TypeScript, @earendil-works/pi-tui (SelectList, Container, Text), @earendil-works/pi-coding-agent ExtensionAPI
 
 ---
 
@@ -22,6 +22,7 @@
 ## Task 1: Fix Truncation in Provider Selection (Level 1)
 
 **Files:**
+
 - Modify: `pi-models.ts:115-125` (SelectList layout options)
 
 **Step 1: Remove max column width constraint**
@@ -59,6 +60,7 @@ Change overlay width from "60%" to "80%" to accommodate longer provider names:
 ```
 
 **Verification:**
+
 - [ ] Provider names like "anthropic" are fully visible
 - [ ] Descriptions still show on the right
 - [ ] Layout adjusts to terminal width
@@ -68,6 +70,7 @@ Change overlay width from "60%" to "80%" to accommodate longer provider names:
 ## Task 2: Fix Truncation in Model Selection (Level 2)
 
 **Files:**
+
 - Modify: `pi-models.ts:showModelList function` (lines ~180-280)
 
 **Step 1: Remove maxNameWidth constraint**
@@ -100,12 +103,14 @@ Change from "90%" to use full terminal width with high minimum:
 
 ```typescript
 // Only truncate if name exceeds available space
-const truncatedName = visibleWidth(displayName) > maxNameWidth
-  ? truncateToWidth(displayName, maxNameWidth, "…")
-  : displayName;
+const truncatedName =
+  visibleWidth(displayName) > maxNameWidth
+    ? truncateToWidth(displayName, maxNameWidth, "…")
+    : displayName;
 ```
 
 **Verification:**
+
 - [ ] Long model names like "claude-sonnet-4-20250501" are fully visible
 - [ ] "● active" indicator still shows for active model
 - [ ] Terminal width is fully utilized
@@ -115,6 +120,7 @@ const truncatedName = visibleWidth(displayName) > maxNameWidth
 ## Task 3: Add Browse Mode Selection (New Level 0)
 
 **Files:**
+
 - Modify: `pi-models.ts:showModelsBrowser function` (add new level)
 
 **Step 1: Create browse mode menu before existing flow**
@@ -125,13 +131,21 @@ Insert new Level 0 at the start of `showModelsBrowser`:
 async function showModelsBrowser(pi: ExtensionAPI, ctx: ExtensionContext) {
   // LEVEL 0: Choose browse mode
   const browseModes: SelectItem[] = [
-    { value: "provider", label: "📦 By Provider", description: "Browse by provider (OpenAI, Anthropic, etc.)" },
-    { value: "family", label: "🏷️ By Model Family", description: "Browse by model type (GPT-4, Claude, etc.)" },
+    {
+      value: "provider",
+      label: "📦 By Provider",
+      description: "Browse by provider (OpenAI, Anthropic, etc.)",
+    },
+    {
+      value: "family",
+      label: "🏷️ By Model Family",
+      description: "Browse by model type (GPT-4, Claude, etc.)",
+    },
   ];
-  
+
   const browseMode = await showSelect(ctx, "📦 Browse Models", browseModes);
   if (!browseMode) return;
-  
+
   if (browseMode === "provider") {
     await showProviderView(pi, ctx);
   } else {
@@ -145,6 +159,7 @@ async function showModelsBrowser(pi: ExtensionAPI, ctx: ExtensionContext) {
 Rename/refactor the existing `while (true)` loop to `showProviderView` function.
 
 **Verification:**
+
 - [ ] Browse mode menu appears first
 - [ ] Selecting "By Provider" shows current provider list
 - [ ] Selecting "By Model Family" shows new family view (implemented in Task 4)
@@ -154,6 +169,7 @@ Rename/refactor the existing `while (true)` loop to `showProviderView` function.
 ## Task 4: Implement Model Family Detection Heuristic
 
 **Files:**
+
 - Modify: `pi-models.ts` (add helper functions)
 
 **Step 1: Create family detection function**
@@ -162,15 +178,17 @@ Add before `showModelsBrowser`:
 
 ```typescript
 interface ModelFamily {
-  id: string;           // Normalized family ID (e.g., "claude-sonnet")
-  displayName: string;  // Human readable (e.g., "Claude Sonnet")
-  models: ModelInfo[];  // All models in this family
+  id: string; // Normalized family ID (e.g., "claude-sonnet")
+  displayName: string; // Human readable (e.g., "Claude Sonnet")
+  models: ModelInfo[]; // All models in this family
 }
 
-function detectModelFamily(model: ModelInfo): { familyId: string; familyName: string } | null {
+function detectModelFamily(
+  model: ModelInfo,
+): { familyId: string; familyName: string } | null {
   const id = model.id.toLowerCase();
   const name = (model.name || "").toLowerCase();
-  
+
   // Claude families
   if (id.includes("claude") || name.includes("claude")) {
     if (id.includes("opus") || name.includes("opus")) {
@@ -184,7 +202,7 @@ function detectModelFamily(model: ModelInfo): { familyId: string; familyName: st
     }
     return { familyId: "claude-other", familyName: "Claude (Other)" };
   }
-  
+
   // GPT families
   if (id.includes("gpt") || name.includes("gpt")) {
     if (id.includes("4o") || name.includes("4o")) {
@@ -207,7 +225,7 @@ function detectModelFamily(model: ModelInfo): { familyId: string; familyName: st
     }
     return { familyId: "gpt-other", familyName: "GPT (Other)" };
   }
-  
+
   // Gemini families
   if (id.includes("gemini") || name.includes("gemini")) {
     if (id.includes("ultra") || name.includes("ultra")) {
@@ -221,7 +239,7 @@ function detectModelFamily(model: ModelInfo): { familyId: string; familyName: st
     }
     return { familyId: "gemini-other", familyName: "Gemini (Other)" };
   }
-  
+
   // Llama families
   if (id.includes("llama") || name.includes("llama")) {
     if (id.includes("3.3") || name.includes("3.3")) {
@@ -238,22 +256,22 @@ function detectModelFamily(model: ModelInfo): { familyId: string; familyName: st
     }
     return { familyId: "llama-other", familyName: "Llama (Other)" };
   }
-  
+
   // Ollama models (local)
   if (model.provider === "ollama") {
     // Extract base name before version tag
     const baseName = id.split(":")[0];
-    return { 
-      familyId: `ollama-${baseName}`, 
-      familyName: baseName.charAt(0).toUpperCase() + baseName.slice(1)
+    return {
+      familyId: `ollama-${baseName}`,
+      familyName: baseName.charAt(0).toUpperCase() + baseName.slice(1),
     };
   }
-  
+
   // Fallback: use provider + first word of ID
   const firstWord = id.split(/[-_]/)[0];
-  return { 
+  return {
     familyId: `${model.provider}-${firstWord}`,
-    familyName: `${model.provider} ${firstWord}`
+    familyName: `${model.provider} ${firstWord}`,
   };
 }
 ```
@@ -263,34 +281,35 @@ function detectModelFamily(model: ModelInfo): { familyId: string; familyName: st
 ```typescript
 function getModelFamilies(models: ModelInfo[]): ModelFamily[] {
   const byFamily = new Map<string, ModelInfo[]>();
-  
+
   for (const model of models) {
     const family = detectModelFamily(model);
     if (!family) continue;
-    
+
     const existing = byFamily.get(family.familyId) ?? [];
     existing.push(model);
     byFamily.set(family.familyId, existing);
   }
-  
+
   const families: ModelFamily[] = [];
   for (const [id, models] of byFamily) {
     // Get display name from first model's detection
     const firstModel = models[0]!;
     const familyInfo = detectModelFamily(firstModel)!;
-    
+
     families.push({
       id,
       displayName: familyInfo.familyName,
       models: models.sort((a, b) => b.id.localeCompare(a.id)), // Sort newest first
     });
   }
-  
+
   return families.sort((a, b) => a.displayName.localeCompare(b.displayName));
 }
 ```
 
 **Verification:**
+
 - [ ] "claude-sonnet-4-20250501" → family "Claude Sonnet"
 - [ ] "gpt-4o-2024-08-06" → family "GPT-4o"
 - [ ] "gemini-1.5-pro" → family "Gemini Pro"
@@ -301,6 +320,7 @@ function getModelFamilies(models: ModelInfo[]): ModelFamily[] {
 ## Task 5: Implement Model Family View
 
 **Files:**
+
 - Modify: `pi-models.ts` (add `showFamilyView` function)
 
 **Step 1: Create family selection level**
@@ -310,23 +330,24 @@ async function showFamilyView(pi: ExtensionAPI, ctx: ExtensionContext) {
   while (true) {
     const allModels = getAvailableModels(ctx);
     const families = getModelFamilies(allModels);
-    
+
     // Build family items with provider info in description
-    const familyItems: SelectItem[] = families.map(f => {
-      const providers = [...new Set(f.models.map(m => m.provider))];
-      const providerDesc = providers.length > 1 
-        ? `Available from ${providers.join(", ")} (${f.models.length} versions)`
-        : `From ${providers[0]} (${f.models.length} versions)`;
-        
+    const familyItems: SelectItem[] = families.map((f) => {
+      const providers = [...new Set(f.models.map((m) => m.provider))];
+      const providerDesc =
+        providers.length > 1
+          ? `Available from ${providers.join(", ")} (${f.models.length} versions)`
+          : `From ${providers[0]} (${f.models.length} versions)`;
+
       return {
         value: f.id,
         label: f.displayName,
         description: providerDesc,
       };
     });
-    
+
     // Add Free Models as special family
-    const freeModels = allModels.filter(m => m.isFree);
+    const freeModels = allModels.filter((m) => m.isFree);
     if (freeModels.length > 0) {
       familyItems.unshift({
         value: "__free",
@@ -334,34 +355,44 @@ async function showFamilyView(pi: ExtensionAPI, ctx: ExtensionContext) {
         description: `${freeModels.length} free models across providers`,
       });
     }
-    
-    const selectedFamilyId = await showSelect(ctx, "🏷️ Model Families", familyItems);
+
+    const selectedFamilyId = await showSelect(
+      ctx,
+      "🏷️ Model Families",
+      familyItems,
+    );
     if (!selectedFamilyId) return; // Esc pressed - go back
-    
+
     // Handle free models
     if (selectedFamilyId === "__free") {
-      const selectedModelId = await showModelList(ctx, "🆓 Free Models", freeModels);
+      const selectedModelId = await showModelList(
+        ctx,
+        "🆓 Free Models",
+        freeModels,
+      );
       if (!selectedModelId) continue; // Esc - back to family list
       await applyModelSelection(pi, ctx, selectedModelId);
       return;
     }
-    
+
     // Find selected family
-    const family = families.find(f => f.id === selectedFamilyId);
+    const family = families.find((f) => f.id === selectedFamilyId);
     if (!family) continue;
-    
+
     // Check if multiple providers
-    const providers = [...new Set(family.models.map(m => m.provider))];
-    
+    const providers = [...new Set(family.models.map((m) => m.provider))];
+
     let selectedModel: ModelInfo;
-    
+
     if (providers.length === 1) {
       // Single provider - select latest version directly
       selectedModel = family.models[0]!; // Already sorted newest first
     } else {
       // Multiple providers - show provider selection with latest from each
-      const providerItems: SelectItem[] = providers.map(provider => {
-        const providerModels = family.models.filter(m => m.provider === provider);
+      const providerItems: SelectItem[] = providers.map((provider) => {
+        const providerModels = family.models.filter(
+          (m) => m.provider === provider,
+        );
         const latest = providerModels[0]!; // Sorted newest first
         return {
           value: provider,
@@ -369,15 +400,21 @@ async function showFamilyView(pi: ExtensionAPI, ctx: ExtensionContext) {
           description: `Latest: ${formatModelName(latest)}`,
         };
       });
-      
-      const selectedProvider = await showSelect(ctx, `🏷️ ${family.displayName} - Select Provider`, providerItems);
+
+      const selectedProvider = await showSelect(
+        ctx,
+        `🏷️ ${family.displayName} - Select Provider`,
+        providerItems,
+      );
       if (!selectedProvider) continue; // Esc - back to family list
-      
+
       // Get latest from selected provider
-      const providerModels = family.models.filter(m => m.provider === selectedProvider);
+      const providerModels = family.models.filter(
+        (m) => m.provider === selectedProvider,
+      );
       selectedModel = providerModels[0]!;
     }
-    
+
     // Apply selection
     const modelId = `${selectedModel.provider}/${selectedModel.id}`;
     await applyModelSelection(pi, ctx, modelId);
@@ -390,23 +427,23 @@ async function showFamilyView(pi: ExtensionAPI, ctx: ExtensionContext) {
 
 ```typescript
 async function applyModelSelection(
-  pi: ExtensionAPI, 
-  ctx: ExtensionContext, 
-  modelRef: string // "provider/modelId" format
+  pi: ExtensionAPI,
+  ctx: ExtensionContext,
+  modelRef: string, // "provider/modelId" format
 ): Promise<void> {
   const slashIndex = modelRef.indexOf("/");
   if (slashIndex === -1) return;
-  
+
   const model = ctx.modelRegistry.find(
     modelRef.slice(0, slashIndex),
     modelRef.slice(slashIndex + 1),
   );
-  
+
   if (!model) {
     ctx.ui.notify(`Model not found`, "error");
     return;
   }
-  
+
   const success = await pi.setModel(model);
   ctx.ui.notify(
     success
@@ -418,6 +455,7 @@ async function applyModelSelection(
 ```
 
 **Verification:**
+
 - [ ] Family view shows all detected families
 - [ ] Families with multiple providers show provider list in description
 - [ ] Selecting family with one provider directly selects latest version
@@ -429,6 +467,7 @@ async function applyModelSelection(
 ## Task 6: Ensure Free Models Work in Both Views
 
 **Files:**
+
 - Modify: `pi-models.ts` (update both views)
 
 **Step 1: Verify Free Models in Provider View**
@@ -440,6 +479,7 @@ Ensure `showProviderView` keeps the "🆓 Free Models" virtual provider at the t
 Already added in Task 5 Step 1 - confirm it works correctly.
 
 **Verification:**
+
 - [ ] Free Models appear as first option in Provider view
 - [ ] Free Models appear as first option in Family view
 - [ ] Selecting Free Models shows all free models across providers
@@ -449,12 +489,13 @@ Already added in Task 5 Step 1 - confirm it works correctly.
 ## Task 7: Testing and Edge Cases
 
 **Files:**
+
 - Modify: `pi-models.ts` (test with various model configurations)
 
 **Test Scenarios:**
 
 1. **Long provider names**
-   - Test with provider name like "vertex-ai-google-cloud" 
+   - Test with provider name like "vertex-ai-google-cloud"
    - Should display fully without truncation
 
 2. **Long model names**
@@ -478,6 +519,7 @@ Already added in Task 5 Step 1 - confirm it works correctly.
    - Should still appear in family view
 
 **Verification:**
+
 - [ ] All scenarios tested manually
 - [ ] No truncation of important information
 - [ ] Navigation (Esc, Enter, arrows) works in all levels
@@ -487,7 +529,7 @@ Already added in Task 5 Step 1 - confirm it works correctly.
 ## Execution Order
 
 1. Task 1: Fix Level 1 truncation (quick win)
-2. Task 2: Fix Level 2 truncation (quick win)  
+2. Task 2: Fix Level 2 truncation (quick win)
 3. Task 4: Implement family detection (foundation)
 4. Task 3: Add browse mode menu + refactor
 5. Task 5: Implement family view
@@ -499,21 +541,24 @@ Already added in Task 5 Step 1 - confirm it works correctly.
 ## Key Code Patterns to Use
 
 **Dynamic width calculation:**
+
 ```typescript
 overlayOptions: { width: "95%", minWidth: 80, anchor: "center" }
 ```
 
 **SelectList without max width constraint:**
+
 ```typescript
-new SelectList(items, maxVisible, theme, { minPrimaryColumnWidth: 20 })
+new SelectList(items, maxVisible, theme, { minPrimaryColumnWidth: 20 });
 // No maxPrimaryColumnWidth = auto-size to content
 ```
 
 **Family detection with fallback:**
+
 ```typescript
-const family = detectModelFamily(model) || { 
-  familyId: `${provider}-unknown`, 
-  familyName: `${provider} (Unknown)` 
+const family = detectModelFamily(model) || {
+  familyId: `${provider}-unknown`,
+  familyName: `${provider} (Unknown)`,
 };
 ```
 

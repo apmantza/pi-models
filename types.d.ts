@@ -3,7 +3,7 @@
  * These packages are provided at runtime by the pi harness and are not installed locally.
  */
 
-declare module "@mariozechner/pi-tui" {
+declare module "@earendil-works/pi-tui" {
 	export class Box {
 		constructor(
 			paddingX?: number,
@@ -148,7 +148,7 @@ declare module "@mariozechner/pi-tui" {
 	};
 }
 
-declare module "@mariozechner/pi-coding-agent" {
+declare module "@earendil-works/pi-coding-agent" {
 	import type {
 		TUI,
 		Theme,
@@ -156,7 +156,7 @@ declare module "@mariozechner/pi-coding-agent" {
 		Component,
 		OverlayOptions,
 		OverlayHandle,
-	} from "@mariozechner/pi-tui";
+	} from "@earendil-works/pi-tui";
 
 	export interface ModelApi {}
 

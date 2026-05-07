@@ -6,6 +6,17 @@ All notable changes to the Pi Models extension.
 
 ### Added
 
+- **New model family:** Added CoBuddy family detection under Baidu lab.
+- **New:** Complete test suite with 71 tests covering all exported pure functions.
+- **Migrated:** Package imports from `@mariozechner/*` to `@earendil-works/*` scope (Pi v0.74.0+ compatibility).
+
+### Changed
+
+- **Fixed:** Hermes model family detection now takes priority over Llama (e.g., `hermes-3-llama` → Hermes).
+- **Fixed:** Tongyi model family detection now takes priority over Qwen (e.g., `tongyi-qwen` → Tongyi).
+
+### Previous
+
 - **New model families:** Added support for ByteDance (lab), Doubao (model family), Cohere (lab), Command (model family), Inclusion AI (lab), Ling (model family), Llada2 (model family), Ring (model family), Poolside (lab), and Laguna (model family) detection.
 - **Fixed:** Ling model family now correctly mapped to Inclusion AI lab.
 

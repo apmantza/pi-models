@@ -12,7 +12,7 @@
 import type {
 	ExtensionAPI,
 	ExtensionContext,
-} from "@mariozechner/pi-coding-agent";
+} from "@earendil-works/pi-coding-agent";
 import {
 	Box,
 	matchesKey,
@@ -22,7 +22,7 @@ import {
 	Text,
 	truncateToWidth,
 	visibleWidth,
-} from "@mariozechner/pi-tui";
+} from "@earendil-works/pi-tui";
 
 export interface ModelInfo {
 	id: string;
@@ -221,6 +221,12 @@ export function detectModelFamily(
 			lab: "Tencent",
 		},
 		{
+			keywords: ["hermes"],
+			familyId: "hermes",
+			familyName: "Hermes",
+			lab: "Nous Research",
+		},
+		{
 			keywords: ["llama"],
 			familyId: "llama",
 			familyName: "Llama",
@@ -238,6 +244,12 @@ export function detectModelFamily(
 			familyId: "qianfan",
 			familyName: "Qianfan",
 			lab: "Baidu",
+		},
+		{
+			keywords: ["tongyi"],
+			familyId: "tongyi",
+			familyName: "Tongyi",
+			lab: "Alibaba",
 		},
 		{
 			keywords: ["qwen"],
@@ -313,10 +325,10 @@ export function detectModelFamily(
 			lab: "Arcee",
 		},
 		{
-			keywords: ["hermes"],
-			familyId: "hermes",
-			familyName: "Hermes",
-			lab: "Nous Research",
+			keywords: ["cobuddy"],
+			familyId: "cobuddy",
+			familyName: "CoBuddy",
+			lab: "Baidu",
 		},
 		{
 			keywords: ["ernie"],
@@ -376,12 +388,6 @@ export function detectModelFamily(
 		},
 		{ keywords: ["rnj"], familyId: "rnj", familyName: "RNJ", lab: "RNJ" },
 		{ keywords: ["step"], familyId: "step", familyName: "Step", lab: "Step" },
-		{
-			keywords: ["tongyi"],
-			familyId: "tongyi",
-			familyName: "Tongyi",
-			lab: "Alibaba",
-		},
 		{
 			keywords: ["o1", "o3", "o4"],
 			familyId: "openai-o",
