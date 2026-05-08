@@ -4,6 +4,8 @@ All notable changes to the Pi Models extension.
 
 ## [Unreleased]
 
+## [0.2.4] - 2026-05-08
+
 ### Added
 
 - **New model family:** Added CoBuddy family detection under Baidu lab.
