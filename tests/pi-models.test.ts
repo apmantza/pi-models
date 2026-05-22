@@ -72,7 +72,9 @@ describe("isModelFree", () => {
 describe("formatModelName", () => {
 	it("returns name when different from id", () => {
 		expect(
-			formatModelName(model({ id: "gpt-4o", provider: "openai", name: "GPT-4o" })),
+			formatModelName(
+				model({ id: "gpt-4o", provider: "openai", name: "GPT-4o" }),
+			),
 		).toBe("GPT-4o");
 	});
 
@@ -205,9 +207,7 @@ describe("detectModelFamily", () => {
 	});
 
 	it("detects router models as Other", () => {
-		const result = detectModelFamily(
-			model({ id: "router", provider: "kilo" }),
-		);
+		const result = detectModelFamily(model({ id: "router", provider: "kilo" }));
 		expect(result?.familyId).toBe("other");
 	});
 
@@ -298,9 +298,7 @@ describe("detectModelFamily", () => {
 	});
 
 	it("detects Grok models", () => {
-		const result = detectModelFamily(
-			model({ id: "grok-2", provider: "xai" }),
-		);
+		const result = detectModelFamily(model({ id: "grok-2", provider: "xai" }));
 		expect(result?.familyId).toBe("grok");
 		expect(result?.lab).toBe("xAI");
 	});
@@ -509,6 +507,73 @@ describe("detectModelFamily", () => {
 		expect(result?.familyId).toBe("glm");
 	});
 
+	it("detects BGE (BAAI) models", () => {
+		const result = detectModelFamily(
+			model({ id: "bge-large-en-v1.5", provider: "ollama" }),
+		);
+		expect(result?.familyId).toBe("bge");
+		expect(result?.familyName).toBe("BGE");
+		expect(result?.lab).toBe("BAAI");
+	});
+
+	it("detects BGE base models", () => {
+		const result = detectModelFamily(
+			model({ id: "bge-base-en-v1.5", provider: "ollama" }),
+		);
+		expect(result?.familyId).toBe("bge");
+		expect(result?.lab).toBe("BAAI");
+	});
+
+	it("detects BGE M3 models", () => {
+		const result = detectModelFamily(
+			model({ id: "bge-m3", provider: "ollama" }),
+		);
+		expect(result?.familyId).toBe("bge");
+		expect(result?.lab).toBe("BAAI");
+	});
+
+	it("detects E5 (Intfloat) models", () => {
+		const result = detectModelFamily(
+			model({ id: "e5-large", provider: "ollama" }),
+		);
+		expect(result?.familyId).toBe("e5");
+		expect(result?.familyName).toBe("E5");
+		expect(result?.lab).toBe("Intfloat");
+	});
+
+	it("detects E5 base models", () => {
+		const result = detectModelFamily(
+			model({ id: "e5-base-v2", provider: "ollama" }),
+		);
+		expect(result?.familyId).toBe("e5");
+		expect(result?.lab).toBe("Intfloat");
+	});
+
+	it("detects Veo 2 (Google) models", () => {
+		const result = detectModelFamily(model({ id: "veo2", provider: "google" }));
+		expect(result?.familyId).toBe("veo2");
+		expect(result?.familyName).toBe("Veo 2");
+		expect(result?.lab).toBe("Google");
+	});
+
+	it("detects HY 2.0 (Tencent) models", () => {
+		const result = detectModelFamily(
+			model({ id: "hy2-7b", provider: "tencent" }),
+		);
+		expect(result?.familyId).toBe("hy2");
+		expect(result?.familyName).toBe("HY 2.0");
+		expect(result?.lab).toBe("Tencent");
+	});
+
+	it("detects LFM 2 (Liquid) models", () => {
+		const result = detectModelFamily(
+			model({ id: "lfm2-7b", provider: "liquid" }),
+		);
+		expect(result?.familyId).toBe("lfm2");
+		expect(result?.familyName).toBe("LFM 2");
+		expect(result?.lab).toBe("Liquid");
+	});
+
 	it("falls back gracefully for unknown models", () => {
 		const result = detectModelFamily(
 			model({ id: "unknown-model-123", provider: "unknown-provider" }),
@@ -576,9 +641,7 @@ describe("getModelFamilies", () => {
 	});
 
 	it("sets lab correctly", () => {
-		const models = [
-			model({ id: "claude-sonnet-4", provider: "anthropic" }),
-		];
+		const models = [model({ id: "claude-sonnet-4", provider: "anthropic" })];
 		const families = getModelFamilies(models);
 
 		expect(families[0].lab).toBe("Anthropic");

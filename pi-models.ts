@@ -159,6 +159,12 @@ export function detectModelFamily(
 		lab: string;
 	}[] = [
 		{
+			keywords: ["bge"],
+			familyId: "bge",
+			familyName: "BGE",
+			lab: "BAAI",
+		},
+		{
 			keywords: ["bytedance"],
 			familyId: "bytedance",
 			familyName: "ByteDance",
@@ -195,6 +201,12 @@ export function detectModelFamily(
 			lab: "ByteDance",
 		},
 		{
+			keywords: ["e5"],
+			familyId: "e5",
+			familyName: "E5",
+			lab: "Intfloat",
+		},
+		{
 			keywords: ["gemma"],
 			familyId: "gemma",
 			familyName: "Gemma",
@@ -212,8 +224,20 @@ export function detectModelFamily(
 			familyName: "Lyria",
 			lab: "Google",
 		},
+		{
+			keywords: ["veo2"],
+			familyId: "veo2",
+			familyName: "Veo 2",
+			lab: "Google",
+		},
 		{ keywords: ["gpt"], familyId: "gpt", familyName: "GPT", lab: "OpenAI" },
 		{ keywords: ["grok"], familyId: "grok", familyName: "Grok", lab: "xAI" },
+		{
+			keywords: ["hy2"],
+			familyId: "hy2",
+			familyName: "HY 2.0",
+			lab: "Tencent",
+		},
 		{
 			keywords: ["hy3"],
 			familyId: "hy3",
@@ -349,6 +373,12 @@ export function detectModelFamily(
 			lab: "Poolside",
 		},
 		{ keywords: ["kat"], familyId: "kat", familyName: "KAT", lab: "KAT" },
+		{
+			keywords: ["lfm2"],
+			familyId: "lfm2",
+			familyName: "LFM 2",
+			lab: "Liquid",
+		},
 		{
 			keywords: ["inclusion"],
 			familyId: "inclusion",

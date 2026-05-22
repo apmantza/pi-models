@@ -104,6 +104,7 @@ The extension automatically categorizes models using pattern matching on model I
 | **Cohere**       | `cohere`             | `cohere-command`, `cohere-embed`                         |
 | **Command**      | `command`            | `command-r-plus`, `command-r`, `command-light`           |
 | **Doubao**       | `doubao`             | `doubao-pro-32k`, `doubao-lite-128k`, `bytedance-doubao` |
+| **E5**           | `e5`                 | `e5-large`, `e5-base-v2`, `intfloat/e5`                  |
 | **GPT**          | `gpt`                | `gpt-4o`, `gpt-4-turbo`, `gpt-3.5-turbo`, `o1-preview`   |
 | **Gemini**       | `gemini`             | `gemini-1.5-pro`, `gemini-1.5-flash`, `gemini-ultra`     |
 | **Llama**        | `llama`              | `llama3.2`, `llama-3.3-70b`, `codellama-70b`             |
@@ -114,17 +115,21 @@ The extension automatically categorizes models using pattern matching on model I
 | **GLM**          | `glm` or `chatglm`   | `glm-4.7`, `glm-5`, `chatglm3`                           |
 | **Nemotron**     | `nemotron`           | `nemotron-4-340b`, `nemotron-3-super`                    |
 | **Mistral**      | `mistral`            | `mistral-large-3`, `mistral-small`                       |
+| **BGE**          | `bge`                | `bge-large-en-v1.5`, `bge-base-en-v1.5`, `bge-m3`        |
 | **Arcee**        | `arcee` or `trinity` | `trinity-large-preview`, `arcee-ai/trinity-mini`         |
 | **Hermes**       | `hermes`             | `hermes-2-pro`, `hermes-3-llama`                         |
 | **Hy3**          | `hy3`                | `hy3-70b`, `hy3-lite`                                    |
+| **HY 2.0**       | `hy2`                | `hy2-7b`, `hy2-33b`                                      |
 | **Inclusion AI** | `inclusion`          | `inclusion-ling`, `inclusion-llada2`, `inclusion-ring`   |
 | **Laguna**       | `laguna`             | `laguna-3b`, `laguna-7b`, `poolside-laguna`              |
 | **Ling**         | `ling`               | `ling-1`, `ling-v2`, `inclusion-ling`                    |
 | **Llada2**       | `llada`              | `llada2-7b`, `llada2-13b`, `inclusion-llada2`            |
 | **Lyria**        | `lyria`              | `lyria-1`, `lyria-v2`                                    |
+| **Veo 2**        | `veo2`               | `veo2`, `veo2-create`                                    |
 | **Ring**         | `ring`               | `ring-1`, `ring-v2`, `inclusion-ring`                    |
 | **Laguna**       | `laguna`             | `laguna-3b`, `laguna-7b`, `poolside-laguna`              |
 | **Poolside**     | `poolside`           | `poolside-laguna`, `poolside-assist`                     |
+| **LFM 2**        | `lfm2`               | `lfm2-7b`, `lfm2-40b`                                    |
 | **Qianfan**      | `qianfan`            | `qianfan-chat`, `qianfan-ernie`                          |
 | **Other**        | `router`, `auto`     | Router models grouped separately                         |
 
@@ -164,7 +169,7 @@ npm run typecheck
 | `detectModelFamily()` | 42 tests - all model family patterns, ollama, routers, multi-provider |
 | `getModelFamilies()`  | 5 tests - grouping, sorting, name-based merging                       |
 
-**Total: 60 tests** covering all major functionality and edge cases.
+**Total: 79 tests** covering all major functionality and edge cases.
 
 ---
 
