@@ -231,7 +231,13 @@ Run `/reload` in Pi.
 
 ## Changelog
 
-### Unreleased
+### 0.2.5
+
+- **New:** BGE model family (BAAI lab)
+- **New:** E5 model family (Intfloat lab)
+- **New:** Veo 2 model family (Google lab)
+- **New:** HY 2.0 model family (Tencent lab)
+- **New:** LFM 2 model family (Liquid lab)
 
 ### 0.2.3
 
