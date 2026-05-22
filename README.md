@@ -231,6 +231,10 @@ Run `/reload` in Pi.
 
 ## Changelog
 
+### 0.2.6
+
+- **Fixed:** 5 CodeQL ReDoS alerts in `normalizeModelName` — polynomial backtracking eliminated
+
 ### 0.2.5
 
 - **New:** BGE model family (BAAI lab)
