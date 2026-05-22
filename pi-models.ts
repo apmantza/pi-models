@@ -567,11 +567,14 @@ function normalizeModelName(name: string): string {
 		name
 			.toLowerCase()
 			// Remove common suffixes added by providers
-			.replace(/\s*\(free\)\s*$/i, "")
-			.replace(/\s*\(cline\)\s*$/i, "")
-			.replace(/\s*\(ci:\s*[\d.]+\)\s*$/i, "") // CI scores like [CI: 29.2]
-			.replace(/\s*\[ci:\s*[\d.]+\]\s*$/i, "")
-			.replace(/\([^)]*\)\s*$/g, "") // Remove any trailing parenthetical (leading space cleaned by .trim() below)
+			// Note: no leading \s* — remaining whitespace is cleaned by .trim() below
+			.replace(/\(free\)\s*$/i, "")
+			.replace(/\(cline\)\s*$/i, "")
+			.replace(/\(ci:\s*[\d.]+\)\s*$/i, "") // CI scores like [CI: 29.2]
+			.replace(/\[ci:\s*[\d.]+\]\s*$/i, "")
+			// Strip trailing whitespace first, then remove any trailing parenthetical
+			.replace(/\s+$/, "")
+			.replace(/\([^)]*\)$/, "") // Remove trailing parenthetical (no backtracking risk)
 			.trim()
 	);
 }
