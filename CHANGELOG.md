@@ -4,6 +4,15 @@ All notable changes to the Pi Models extension.
 
 ## [Unreleased]
 
+## [0.2.8] - 2026-06-21
+
+### Fixed
+
+- **Maintainability:** Replaced mutating `.sort()` with non-mutating
+  `[...array].sort()` to avoid side effects on source data.
+- **CI:** Pinned GitHub Actions to full commit SHAs and added
+  `--ignore-scripts` to `npm ci` steps.
+
 ## [0.2.7] - 2026-06-21
 
 ### Security
@@ -127,6 +136,7 @@ All notable changes to the Pi Models extension.
 
 ---
 
+[0.2.8]: https://github.com/apmantza/pi-models/compare/v0.2.7...v0.2.8
 [0.2.7]: https://github.com/apmantza/pi-models/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/apmantza/pi-models/compare/v0.2.5...v0.2.6
 [0.2.5]: https://github.com/apmantza/pi-models/compare/v0.2.4...v0.2.5
