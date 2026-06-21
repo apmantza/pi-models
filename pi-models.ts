@@ -627,14 +627,14 @@ export function getModelFamilies(models: ModelInfo[]): ModelFamily[] {
 	const families: ModelFamily[] = [];
 	for (const [id, models] of byFamily) {
 		// Get display name from first model's detection
-		const firstModel = models[0]!;
+		const firstModel = models[0];
 		const familyInfo = detectModelFamily(firstModel)!;
 
 		families.push({
 			id,
 			displayName: familyInfo.familyName,
 			lab: familyInfo.lab,
-			models: models.sort(
+			models: [...models].sort(
 				(a, b) =>
 					a.provider.localeCompare(b.provider) || b.id.localeCompare(a.id),
 			), // Sort by provider, then newest first
@@ -668,7 +668,7 @@ export function getLabs(models: ModelInfo[]): Lab[] {
 		labs.push({
 			id,
 			name: data.models[0] ? detectModelFamily(data.models[0])?.lab || id : id,
-			models: data.models.sort((a, b) => a.id.localeCompare(b.id)),
+			models: [...data.models].sort((a, b) => a.id.localeCompare(b.id)),
 			families: [...data.families],
 		});
 	}
