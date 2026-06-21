@@ -78,7 +78,9 @@ jobs:
           git push origin "${{ needs.prepare.outputs.tag }}"
 
       - name: Create GitHub release
-        uses: softprops/action-gh-release@v3
+        uses: >-
+          softprops/action-gh-release@
+          7c4723f7a335432393329f8f1c564994ce50185d # v3
         with:
           tag_name: ${{ needs.prepare.outputs.tag }}
           name: ${{ needs.prepare.outputs.tag }}
@@ -101,7 +103,7 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --ignore-scripts
 
       - name: Dry-run publish (validates tarball + registry auth)
         env:
