@@ -78,9 +78,7 @@ jobs:
           git push origin "${{ needs.prepare.outputs.tag }}"
 
       - name: Create GitHub release
-        uses: >-
-          softprops/action-gh-release@
-          7c4723f7a335432393329f8f1c564994ce50185d # v3
+        uses: "softprops/action-gh-release@7c4723f7a335432393329f8f1c564994ce50185d"
         with:
           tag_name: ${{ needs.prepare.outputs.tag }}
           name: ${{ needs.prepare.outputs.tag }}
