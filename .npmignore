@@ -24,6 +24,7 @@ vitest.config.*
 
 # CI/Git
 .github/
+sonar-project.properties
 .gitignore
 .travis.yml
 .gitlab-ci.yml
