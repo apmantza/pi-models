@@ -570,11 +570,14 @@ function normalizeModelName(name: string): string {
 			// Note: no leading \s* — remaining whitespace is cleaned by .trim() below
 			.replace(/\(free\)\s*$/i, "")
 			.replace(/\(cline\)\s*$/i, "")
-			.replace(/\(ci:\s*[\d.]+\)\s*$/i, "") // CI scores like [CI: 29.2]
-			.replace(/\[ci:\s*[\d.]+\]\s*$/i, "")
+			// CI scores like "(ci: 29.2)" / "[ci: 29.2]"
+			// Use non-greedy quantifiers to avoid ReDoS (CodeQL #8, #9)
+			.replace(/\(ci:\s*\d+(?:\.\d+)?\)\s*$/i, "")
+			.replace(/\[ci:\s*\d+(?:\.\d+)?\]\s*$/i, "")
 			// Strip trailing whitespace first, then remove any trailing parenthetical
 			.replace(/\s+$/, "")
-			.replace(/\([^)]*\)$/, "") // Remove trailing parenthetical (no backtracking risk)
+			// Use possessive-like guard: match up to last ')' only at end of string
+			.replace(/\([^)]+\)\s*$/, "")
 			.trim()
 	);
 }
