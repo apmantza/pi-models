@@ -4,6 +4,19 @@ All notable changes to the Pi Models extension.
 
 ## [Unreleased]
 
+## [0.2.7] - 2026-06-21
+
+### Security
+
+- **Fixed:** Resolved ReDoS CodeQL alerts (#8, #9, #10) in
+  `normalizeModelName` by replacing polynomial regex patterns with
+  bounded alternatives.
+
+### Changed
+
+- Added SonarCloud quality gate to CI.
+- Updated CI to use LF line endings consistently.
+
 ## [0.2.6] - 2026-06-21
 
 ### Security
@@ -114,6 +127,7 @@ All notable changes to the Pi Models extension.
 
 ---
 
+[0.2.7]: https://github.com/apmantza/pi-models/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/apmantza/pi-models/compare/v0.2.5...v0.2.6
 [0.2.5]: https://github.com/apmantza/pi-models/compare/v0.2.4...v0.2.5
 [0.2.3]: https://github.com/apmantza/pi-models/compare/v0.2.2...v0.2.3
