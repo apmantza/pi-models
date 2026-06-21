@@ -4,6 +4,32 @@ All notable changes to the Pi Models extension.
 
 ## [Unreleased]
 
+## [0.2.6] - 2026-06-21
+
+### Security
+
+- **Fixed:** Updated `vite` (transitive via vitest) to `8.0.16` to patch
+  two HIGH vulnerabilities:
+  - GHSA-v6wh-96g9-6wx3: NTLMv2 hash disclosure via UNC path handling
+    on Windows
+  - GHSA-fx2h-pf6j-xcff: `server.fs.deny` bypass on Windows alternate paths
+
+### Changed
+
+- Added automated release workflow (GitHub Actions + npm publish).
+- Bumped CI actions to node24.
+
+## [0.2.5] - 2026-05-08
+
+### Added
+
+- **New model families:** Added BGE (BAAI), E5 (Intfloat), Veo 2 (Google),
+  HY 2.0 (Tencent), and LFM 2 (Liquid) family detection.
+
+### Fixed
+
+- **ReDoS:** Fixed 5 CodeQL alerts in `normalizeModelName` regex patterns.
+
 ## [0.2.4] - 2026-05-08
 
 ### Added
@@ -88,6 +114,8 @@ All notable changes to the Pi Models extension.
 
 ---
 
+[0.2.6]: https://github.com/apmantza/pi-models/compare/v0.2.5...v0.2.6
+[0.2.5]: https://github.com/apmantza/pi-models/compare/v0.2.4...v0.2.5
 [0.2.3]: https://github.com/apmantza/pi-models/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/apmantza/pi-models/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/apmantza/pi-models/compare/v0.2.0...v0.2.1
