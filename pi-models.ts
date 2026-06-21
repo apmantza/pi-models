@@ -571,9 +571,9 @@ function normalizeModelName(name: string): string {
 			.replace(/\(free\)\s*$/i, "")
 			.replace(/\(cline\)\s*$/i, "")
 			// CI scores like "(ci: 29.2)" / "[ci: 29.2]"
-			// Use non-greedy quantifiers to avoid ReDoS (CodeQL #8, #9)
-			.replace(/\(ci:\s*\d+(?:\.\d+)?\)\s*$/i, "")
-			.replace(/\[ci:\s*\d+(?:\.\d+)?\]\s*$/i, "")
+			// Bounded \s{0,3} avoids super-linear backtracking (SonarCloud hotspots)
+			.replace(/\(ci:\s{0,3}\d+(?:\.\d+)?\)\s*$/i, "")
+			.replace(/\[ci:\s{0,3}\d+(?:\.\d+)?\]\s*$/i, "")
 			// Strip trailing whitespace first, then remove any trailing parenthetical
 			.replace(/\s+$/, "")
 			// Use possessive-like guard: match up to last ')' only at end of string
