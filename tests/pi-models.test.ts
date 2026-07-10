@@ -245,6 +245,12 @@ describe("models.dev metadata", () => {
 				},
 			},
 			openai: { models: { "gpt-5.4": { family: "gpt" } } },
+			alibaba: {
+				models: {
+					"qwen3.6": { family: "qwen" },
+					"qwen3.7": { family: "qwen" },
+				},
+			},
 			zhipu: {
 				models: {
 					"glm-4.7": { family: "glm" },
@@ -264,11 +270,22 @@ describe("models.dev metadata", () => {
 					"deepseek-r1": { family: "deepseek-thinking" },
 				},
 			},
+			moonshotai: {
+				models: { "kimi-k2.6": { family: "kimi-thinking" } },
+			},
+			poolside: {
+				models: {
+					"poolside/laguna-m.1": { family: "laguna" },
+					"poolside/laguna-xs.2": { family: "laguna" },
+				},
+			},
 		});
 		const models = [
 			["gemma-4-31b", "google"],
 			["gemma-3-27b", "google"],
 			["gpt-5.4", "openai"],
+			["qwen3.6", "alibaba"],
+			["qwen3.7", "alibaba"],
 			["glm-4.7", "zhipu"],
 			["glm-5", "zhipu"],
 			["MiniMax-M2.7", "minimax"],
@@ -276,6 +293,9 @@ describe("models.dev metadata", () => {
 			["MiniMax-M3", "minimax"],
 			["deepseek-v4-pro", "deepseek"],
 			["deepseek-r1", "deepseek"],
+			["kimi-k2.6", "moonshotai"],
+			["poolside/laguna-m.1", "poolside"],
+			["poolside/laguna-xs.2", "poolside"],
 		].map(([id, provider]) =>
 			enrichModelWithModelsDev(model({ id, provider }), metadata),
 		);
@@ -286,6 +306,8 @@ describe("models.dev metadata", () => {
 				"Gemma 3",
 				"Gemma 4",
 				"GPT 5",
+				"Qwen 3.6",
+				"Qwen 3.7",
 				"GLM 4",
 				"GLM 5",
 				"MiniMax 2.5",
@@ -293,8 +315,36 @@ describe("models.dev metadata", () => {
 				"MiniMax 3",
 				"DeepSeek Pro 4",
 				"DeepSeek Thinking 1",
+				"Kimi Thinking 2.6",
+				"Laguna M1",
+				"Laguna XS2",
 			]),
 		);
+	});
+
+	it("infers families for gateway models missing models.dev family metadata", () => {
+		const metadata = createModelsDevMetadata({
+			zenmux: {
+				models: {
+					"meta-llama/llama-3.1-8b": { id: "meta-llama/llama-3.1-8b" },
+					"meta-llama/llama-4-scout": { id: "meta-llama/llama-4-scout" },
+				},
+			},
+		});
+		const models = [
+			enrichModelWithModelsDev(
+				model({ id: "meta-llama/llama-3.1-8b", provider: "zenmux" }),
+				metadata,
+			),
+			enrichModelWithModelsDev(
+				model({ id: "llama-4-scout", provider: "zenmux" }),
+				metadata,
+			),
+		];
+
+		expect(
+			getModelFamilies(models).map((family) => family.displayName),
+		).toEqual(expect.arrayContaining(["Llama 3", "Llama 4"]));
 	});
 });
 

@@ -136,10 +136,12 @@ function getFamilyDisplayName(
 	if (familyId === "deepseek-thinking" && /\bpro\b/.test(modelText)) {
 		name = "DeepSeek Pro";
 	}
-	return version ? `${name} ${version}` : name;
+	const displayVersion =
+		familyId === "laguna" ? version?.toUpperCase() : version;
+	return displayVersion ? `${name} ${displayVersion}` : name;
 }
 
-function extractMajorVersion(
+function extractFamilyVersion(
 	model: ModelInfo,
 	familyId: string,
 ): string | undefined {
@@ -148,6 +150,20 @@ function extractMajorVersion(
 	const familyIndex = text.indexOf(familyRoot);
 	const searchText =
 		familyIndex === -1 ? text : text.slice(familyIndex + familyRoot.length);
+	if (familyRoot === "laguna") {
+		const match = searchText.match(
+			/(?:^|[\s._:/-])(m|xs)[\s._:/-]*(\d+)(?:\.\d+)?(?=$|[\s._:/-])/i,
+		);
+		return match ? `${match[1].toLowerCase()}${match[2]}` : undefined;
+	}
+
+	if (familyRoot === "kimi") {
+		const match = searchText.match(
+			/(?:^|[\s._:/-])k(\d+)(?:\.(\d+))?(?=$|[\s._:/-])/i,
+		);
+		if (match) return match[2] ? `${match[1]}.${match[2]}` : match[1];
+	}
+
 	const match = searchText.match(
 		/(?:^|[\s._:/-])[vmr]?(\d+)(?:\.(\d+))?(?=$|[\s._:/-])/i,
 	);
@@ -155,7 +171,7 @@ function extractMajorVersion(
 
 	const major = Number(match[1]);
 	if (major < 1 || major > 10) return undefined;
-	return familyRoot === "minimax" && match[2]
+	return (familyRoot === "minimax" || familyRoot === "qwen") && match[2]
 		? `${match[1]}.${match[2]}`
 		: match[1];
 }
@@ -309,6 +325,15 @@ function findModelsDevModel(
 		if (exact) return exact;
 	}
 
+	const providerPrefix = `${model.provider.toLowerCase()}/`;
+	for (const modelId of modelIdVariants(model.id)) {
+		const suffix = `/${modelId}`;
+		const matches = [...metadata.modelsByProviderAndId.entries()]
+			.filter(([key]) => key.startsWith(providerPrefix) && key.endsWith(suffix))
+			.map(([, candidate]) => candidate);
+		if (matches.length === 1) return matches[0];
+	}
+
 	for (const modelId of modelIdVariants(model.id)) {
 		const candidates = metadata.modelsById.get(modelId) ?? [];
 		if (candidates.length === 1) return candidates[0];
@@ -321,26 +346,31 @@ function getModelsDevFamily(
 	metadata: ModelsDevMetadata,
 ): ModelInfo["modelsDevFamily"] {
 	const remoteModel = findModelsDevModel(model, metadata);
-	const remoteFamilyId = remoteModel?.family?.trim().toLowerCase();
-	if (!remoteFamilyId) return undefined;
-	const familyId = normalizeModelsDevFamilyId(remoteFamilyId);
-	const version = extractMajorVersion(model, familyId);
-	const versionedFamilyId = version ? `${familyId}-${version}` : familyId;
+	if (!remoteModel) return undefined;
 
-	// Keep the existing heuristic as a lab fallback. models.dev currently
-	// publishes family IDs but not a lab field in api.json.
+	// Some providers, notably gateways such as zenmux, are present in
+	// models.dev but omit the family field. Infer those from the model ID/name.
 	const fallback = detectModelFamilyHeuristic(model);
+	const remoteFamilyId = remoteModel.family?.trim().toLowerCase();
+	const familyId = normalizeModelsDevFamilyId(
+		remoteFamilyId ?? fallback?.familyId ?? "other",
+	);
+	const version = extractFamilyVersion(model, familyId);
+	const versionedFamilyId = version ? `${familyId}-${version}` : familyId;
+	const lab = remoteFamilyId
+		? (metadata.familyLabs.get(remoteFamilyId) ??
+			metadata.familyLabs.get(familyId) ??
+			fallback?.lab ??
+			"Other")
+		: (fallback?.lab ?? metadata.familyLabs.get(familyId) ?? "Other");
+
 	return {
 		familyId: versionedFamilyId,
 		familyName:
 			versionedFamilyId === fallback?.familyId
 				? fallback.familyName
 				: getFamilyDisplayName(model, familyId, version),
-		lab:
-			metadata.familyLabs.get(remoteFamilyId) ??
-			metadata.familyLabs.get(familyId) ??
-			fallback?.lab ??
-			"Other",
+		lab,
 	};
 }
 
