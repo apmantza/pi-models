@@ -976,12 +976,30 @@ function normalizeModelName(name: string): string {
 	);
 }
 
+function resolveModelFamily(
+	model: ModelInfo,
+): { familyId: string; familyName: string; lab: string } | null {
+	const family = detectModelFamily(model);
+	if (!family || model.modelsDevFamily || family.familyId === "other") {
+		return family;
+	}
+
+	const version = extractFamilyVersion(model, family.familyId);
+	if (!version) return family;
+
+	return {
+		familyId: `${family.familyId}-${version}`,
+		familyName: getFamilyDisplayName(model, family.familyId, version),
+		lab: family.lab,
+	};
+}
+
 export function getModelFamilies(models: ModelInfo[]): ModelFamily[] {
 	const byFamily = new Map<string, ModelInfo[]>();
 	const nameToFamilyId = new Map<string, string>();
 
 	for (const model of models) {
-		const family = detectModelFamily(model);
+		const family = resolveModelFamily(model);
 		if (!family) continue;
 
 		const existing = byFamily.get(family.familyId) ?? [];
@@ -1022,7 +1040,7 @@ export function getModelFamilies(models: ModelInfo[]): ModelFamily[] {
 	for (const [id, models] of byFamily) {
 		// Get display name from first model's detection
 		const firstModel = models[0];
-		const familyInfo = detectModelFamily(firstModel)!;
+		const familyInfo = resolveModelFamily(firstModel)!;
 
 		families.push({
 			id,
@@ -1045,7 +1063,7 @@ export function getLabs(models: ModelInfo[]): Lab[] {
 	>();
 
 	for (const model of models) {
-		const familyInfo = detectModelFamily(model);
+		const familyInfo = resolveModelFamily(model);
 		const lab = familyInfo?.lab || "Unknown";
 		const labId = lab.toLowerCase().replace(/\s+/g, "-");
 
@@ -1061,7 +1079,7 @@ export function getLabs(models: ModelInfo[]): Lab[] {
 	for (const [id, data] of byLab) {
 		labs.push({
 			id,
-			name: data.models[0] ? detectModelFamily(data.models[0])?.lab || id : id,
+			name: data.models[0] ? resolveModelFamily(data.models[0])?.lab || id : id,
 			models: [...data.models].sort((a, b) => a.id.localeCompare(b.id)),
 			families: [...data.families],
 		});

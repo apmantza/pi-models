@@ -885,9 +885,9 @@ describe("getModelFamilies", () => {
 		];
 		const families = getModelFamilies(models);
 
-		expect(families).toHaveLength(2);
-		const claude = families.find((f) => f.id === "claude");
-		expect(claude?.models).toHaveLength(2);
+		expect(families).toHaveLength(3);
+		expect(families.find((f) => f.id === "claude-3")?.models).toHaveLength(1);
+		expect(families.find((f) => f.id === "claude-4")?.models).toHaveLength(1);
 	});
 
 	it("merges families with same normalized name", () => {
@@ -921,6 +921,23 @@ describe("getModelFamilies", () => {
 
 	it("returns empty array for no models", () => {
 		expect(getModelFamilies([])).toEqual([]);
+	});
+
+	it("versions heuristic families instead of leaving generic duplicates", () => {
+		const models = [
+			model({ id: "llama-3.2-70b", provider: "ollama" }),
+			model({ id: "llama-4-scout", provider: "ollama" }),
+			model({ id: "grok-4.3", provider: "xai" }),
+			model({ id: "kimi-k2.6", provider: "moonshotai" }),
+		];
+		const families = getModelFamilies(models);
+
+		expect(families.map((family) => family.displayName)).toEqual(
+			expect.arrayContaining(["Llama 3", "Llama 4", "Grok 4", "Kimi 2.6"]),
+		);
+		expect(families.some((family) => family.displayName === "Llama")).toBe(
+			false,
+		);
 	});
 
 	it("sets lab correctly", () => {
