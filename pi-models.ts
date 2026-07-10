@@ -31,6 +31,223 @@ export interface ModelInfo {
 	isFree: boolean;
 	inputCost: number;
 	outputCost: number;
+	/** Family metadata supplied by models.dev, when available. */
+	modelsDevFamily?: {
+		familyId: string;
+		familyName: string;
+		lab: string;
+	};
+}
+
+interface ModelsDevModel {
+	id?: string;
+	family?: string;
+}
+
+interface ModelsDevProvider {
+	models?: Record<string, ModelsDevModel>;
+}
+
+interface ModelsDevCatalogModel {
+	family?: string;
+}
+
+interface ModelsDevCatalog {
+	models?: Record<string, ModelsDevCatalogModel>;
+}
+
+export interface ModelsDevMetadata {
+	modelsByProviderAndId: Map<string, ModelsDevModel>;
+	modelsById: Map<string, ModelsDevModel[]>;
+	familyLabs: Map<string, string>;
+}
+
+const MODELS_DEV_API_URL = "https://models.dev/api.json";
+const MODELS_DEV_CATALOG_URL = "https://models.dev/catalog.json";
+const MODELS_DEV_TIMEOUT_MS = 2000;
+
+function humanizeSlug(value: string): string {
+	return value
+		.replace(/^[-_.]+|[-_.]+$/g, "")
+		.split(/[-_.]+/)
+		.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+		.join(" ");
+}
+
+function modelIdVariants(id: string): string[] {
+	const normalized = id.toLowerCase();
+	return normalized.startsWith("@cf/")
+		? [normalized, normalized.slice(4)]
+		: [normalized];
+}
+
+function modelsDevKey(provider: string, id: string): string {
+	return `${provider.toLowerCase()}/${id.toLowerCase()}`;
+}
+
+function addFamilyLabCount(
+	countsByFamily: Map<string, Map<string, number>>,
+	family: string | undefined,
+	lab: string | undefined,
+): void {
+	if (!family || !lab) return;
+	const counts = countsByFamily.get(family) ?? new Map<string, number>();
+	counts.set(lab, (counts.get(lab) ?? 0) + 1);
+	countsByFamily.set(family, counts);
+}
+
+/**
+ * Convert the public models.dev payloads into small lookup maps.
+ *
+ * models.dev's provider API supplies the family, while catalog.json supplies
+ * the canonical model prefix (the lab). Keeping this adapter separate makes
+ * the UI independent of either endpoint's wire format.
+ */
+export function createModelsDevMetadata(
+	api: Record<string, ModelsDevProvider>,
+	catalog: ModelsDevCatalog = {},
+): ModelsDevMetadata {
+	const modelsByProviderAndId = new Map<string, ModelsDevModel>();
+	const modelsById = new Map<string, ModelsDevModel[]>();
+
+	for (const [provider, providerData] of Object.entries(api)) {
+		for (const [id, model] of Object.entries(providerData.models ?? {})) {
+			for (const modelId of modelIdVariants(id)) {
+				modelsByProviderAndId.set(modelsDevKey(provider, modelId), model);
+			}
+
+			const ids = model.id ? [id, model.id] : [id];
+			for (const modelId of ids.flatMap(modelIdVariants)) {
+				const existing = modelsById.get(modelId) ?? [];
+				if (!existing.includes(model)) existing.push(model);
+				modelsById.set(modelId, existing);
+			}
+		}
+	}
+
+	const familyLabCounts = new Map<string, Map<string, number>>();
+	for (const [id, model] of Object.entries(catalog.models ?? {})) {
+		const slash = id.indexOf("/");
+		const family = model.family?.toLowerCase();
+		if (slash === -1 || !family) continue;
+
+		addFamilyLabCount(familyLabCounts, family, id.slice(0, slash));
+	}
+
+	// For families not present in catalog.json, provider model IDs often use
+	// the canonical "lab/model" form. Use the most common prefix as a fallback.
+	for (const model of modelsByProviderAndId.values()) {
+		const family = model.family?.toLowerCase();
+		const id = model.id ?? "";
+		const slash = id.indexOf("/");
+		if (!family || familyLabCounts.has(family) || slash === -1) continue;
+
+		addFamilyLabCount(familyLabCounts, family, id.slice(0, slash));
+	}
+
+	const familyLabs = new Map<string, string>();
+	for (const [family, counts] of familyLabCounts) {
+		const lab = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
+		if (lab) familyLabs.set(family, humanizeSlug(lab));
+	}
+
+	return { modelsByProviderAndId, modelsById, familyLabs };
+}
+
+async function fetchJson<T>(url: string): Promise<T> {
+	const controller = new AbortController();
+	const timeout = setTimeout(() => controller.abort(), MODELS_DEV_TIMEOUT_MS);
+	try {
+		const response = await fetch(url, { signal: controller.signal });
+		if (!response.ok) throw new Error(`HTTP ${response.status}`);
+		return (await response.json()) as T;
+	} finally {
+		clearTimeout(timeout);
+	}
+}
+
+let modelsDevMetadataPromise: Promise<ModelsDevMetadata> | undefined;
+
+async function loadModelsDevMetadata(): Promise<ModelsDevMetadata | null> {
+	if (!modelsDevMetadataPromise) {
+		modelsDevMetadataPromise = Promise.all([
+			fetchJson<Record<string, ModelsDevProvider>>(MODELS_DEV_API_URL),
+			fetchJson<ModelsDevCatalog>(MODELS_DEV_CATALOG_URL),
+		]).then(([api, catalog]) => createModelsDevMetadata(api, catalog));
+	}
+
+	try {
+		return await modelsDevMetadataPromise;
+	} catch (error) {
+		// Do not cache failures forever: a transient network error should be
+		// retried the next time /models is opened.
+		modelsDevMetadataPromise = undefined;
+		return null;
+	}
+}
+
+function findModelsDevModel(
+	model: Pick<ModelInfo, "provider" | "id">,
+	metadata: ModelsDevMetadata,
+): ModelsDevModel | undefined {
+	for (const modelId of modelIdVariants(model.id)) {
+		const exact = metadata.modelsByProviderAndId.get(
+			modelsDevKey(model.provider, modelId),
+		);
+		if (exact) return exact;
+	}
+
+	for (const modelId of modelIdVariants(model.id)) {
+		const candidates = metadata.modelsById.get(modelId) ?? [];
+		if (candidates.length === 1) return candidates[0];
+	}
+	return undefined;
+}
+
+function getModelsDevFamily(
+	model: ModelInfo,
+	metadata: ModelsDevMetadata,
+): ModelInfo["modelsDevFamily"] {
+	const remoteModel = findModelsDevModel(model, metadata);
+	const familyId = remoteModel?.family?.trim().toLowerCase();
+	if (!familyId) return undefined;
+
+	// Keep the existing heuristic as a lab fallback. models.dev currently
+	// publishes family IDs but not a lab field in api.json.
+	const fallback = detectModelFamilyHeuristic(model);
+	return {
+		familyId,
+		familyName:
+			familyId === fallback?.familyId
+				? fallback.familyName
+				: humanizeSlug(familyId),
+		lab: metadata.familyLabs.get(familyId) ?? fallback?.lab ?? "Other",
+	};
+}
+
+export function enrichModelWithModelsDev(
+	model: ModelInfo,
+	metadata: ModelsDevMetadata,
+): ModelInfo {
+	const modelsDevFamily = getModelsDevFamily(model, metadata);
+	return modelsDevFamily ? { ...model, modelsDevFamily } : model;
+}
+
+function getAvailableModels(
+	ctx: ExtensionContext,
+	metadata?: ModelsDevMetadata | null,
+): ModelInfo[] {
+	return ctx.modelRegistry.getAvailable().map((m) => {
+		const model: ModelInfo = {
+			id: m.id,
+			name: m.name,
+			provider: m.provider,
+			isFree: isModelFree(m),
+			inputCost: m.cost?.input ?? 0,
+			outputCost: m.cost?.output ?? 0,
+		};
+		return metadata ? enrichModelWithModelsDev(model, metadata) : model;
+	});
 }
 
 // Providers that expose actual per-model pricing via API
@@ -68,17 +285,6 @@ export function isModelFree(model: {
 	}
 
 	return false;
-}
-
-function getAvailableModels(ctx: ExtensionContext): ModelInfo[] {
-	return ctx.modelRegistry.getAvailable().map((m) => ({
-		id: m.id,
-		name: m.name,
-		provider: m.provider,
-		isFree: isModelFree(m),
-		inputCost: m.cost?.input ?? 0,
-		outputCost: m.cost?.output ?? 0,
-	}));
 }
 
 export function formatModelName(model: ModelInfo): string {
@@ -126,7 +332,19 @@ export interface Lab {
 	families: string[]; // Family IDs this lab has models in
 }
 
-export function detectModelFamily(
+function isRouterModel(model: ModelInfo): boolean {
+	let id = model.id.toLowerCase();
+	const name = (model.name || "").toLowerCase();
+	if (id.startsWith("@cf/")) id = id.slice(4);
+	const fullText = `${id} ${name}`;
+	return (
+		/\brouter\b/.test(fullText) ||
+		/\bauto\b/.test(fullText) ||
+		id === "kilo-auto/free"
+	);
+}
+
+function detectModelFamilyHeuristic(
 	model: ModelInfo,
 ): { familyId: string; familyName: string; lab: string } | null {
 	let id = model.id.toLowerCase();
@@ -141,12 +359,7 @@ export function detectModelFamily(
 	const fullText = `${id} ${name}`;
 
 	// Router models (gateways to free models) - group into "Other"
-	// Match "router" or "auto" as whole words, or specific known router IDs
-	if (
-		/\brouter\b/.test(fullText) ||
-		/\bauto\b/.test(fullText) ||
-		id === "kilo-auto/free"
-	) {
+	if (isRouterModel(model)) {
 		return { familyId: "other", familyName: "Other", lab: "Other" };
 	}
 
@@ -557,6 +770,15 @@ export function detectModelFamily(
 	};
 }
 
+export function detectModelFamily(
+	model: ModelInfo,
+): { familyId: string; familyName: string; lab: string } | null {
+	if (isRouterModel(model)) {
+		return { familyId: "other", familyName: "Other", lab: "Other" };
+	}
+	return model.modelsDevFamily ?? detectModelFamilyHeuristic(model);
+}
+
 /**
  * Normalize a model name for comparison by removing provider-specific suffixes
  * and common qualifiers. This helps detect when the same model is offered by
@@ -706,12 +928,23 @@ export default function (pi: ExtensionAPI) {
 	pi.registerCommand("models", {
 		description: "Browse and select models",
 		handler: async (_args, ctx) => {
-			await showModelsBrowser(pi, ctx);
+			try {
+				// models.dev enriches the models Pi can actually use. It never replaces
+				// Pi's registry, which is filtered by configured credentials/local models.
+				const metadata = await loadModelsDevMetadata();
+				await showModelsBrowser(pi, ctx, metadata);
+			} catch {
+				ctx.ui.notify("Unable to open the model browser", "error");
+			}
 		},
 	});
 }
 
-async function showModelsBrowser(pi: ExtensionAPI, ctx: ExtensionContext) {
+async function showModelsBrowser(
+	pi: ExtensionAPI,
+	ctx: ExtensionContext,
+	metadata: ModelsDevMetadata | null,
+) {
 	// LEVEL 0: Choose browse mode
 	const browseModes: SelectItem[] = [
 		{
@@ -735,17 +968,21 @@ async function showModelsBrowser(pi: ExtensionAPI, ctx: ExtensionContext) {
 	if (!browseMode) return;
 
 	if (browseMode === "provider") {
-		await showProviderView(pi, ctx);
+		await showProviderView(pi, ctx, metadata);
 	} else if (browseMode === "lab") {
-		await showLabView(pi, ctx);
+		await showLabView(pi, ctx, metadata);
 	} else {
-		await showFamilyView(pi, ctx);
+		await showFamilyView(pi, ctx, metadata);
 	}
 }
 
-async function showFamilyView(pi: ExtensionAPI, ctx: ExtensionContext) {
+async function showFamilyView(
+	pi: ExtensionAPI,
+	ctx: ExtensionContext,
+	metadata: ModelsDevMetadata | null,
+) {
 	while (true) {
-		const allModels = getAvailableModels(ctx);
+		const allModels = getAvailableModels(ctx, metadata);
 		const families = getModelFamilies(allModels);
 
 		// Build family items with provider info in description
@@ -780,13 +1017,13 @@ async function showFamilyView(pi: ExtensionAPI, ctx: ExtensionContext) {
 			() => "__toggle", // Return toggle sentinel on Tab
 		);
 		if (!selectedFamilyId) {
-			await showModelsBrowser(pi, ctx);
+			await showModelsBrowser(pi, ctx, metadata);
 			return;
 		}
 
 		// Handle toggle to provider view
 		if (selectedFamilyId === "__toggle") {
-			await showProviderView(pi, ctx);
+			await showProviderView(pi, ctx, metadata);
 			return;
 		}
 
@@ -818,9 +1055,13 @@ async function showFamilyView(pi: ExtensionAPI, ctx: ExtensionContext) {
 	}
 }
 
-async function showLabView(pi: ExtensionAPI, ctx: ExtensionContext) {
+async function showLabView(
+	pi: ExtensionAPI,
+	ctx: ExtensionContext,
+	metadata: ModelsDevMetadata | null,
+) {
 	while (true) {
-		const allModels = getAvailableModels(ctx);
+		const allModels = getAvailableModels(ctx, metadata);
 		const labs = getLabs(allModels);
 		const freeModels = allModels.filter((m) => m.isFree);
 
@@ -848,13 +1089,13 @@ async function showLabView(pi: ExtensionAPI, ctx: ExtensionContext) {
 			() => "__toggle", // Return toggle sentinel on Tab
 		);
 		if (!selectedLabId) {
-			await showModelsBrowser(pi, ctx);
+			await showModelsBrowser(pi, ctx, metadata);
 			return;
 		}
 
 		// Handle toggle to provider view
 		if (selectedLabId === "__toggle") {
-			await showProviderView(pi, ctx);
+			await showProviderView(pi, ctx, metadata);
 			return;
 		}
 
@@ -886,9 +1127,13 @@ async function showLabView(pi: ExtensionAPI, ctx: ExtensionContext) {
 	}
 }
 
-async function showProviderView(pi: ExtensionAPI, ctx: ExtensionContext) {
+async function showProviderView(
+	pi: ExtensionAPI,
+	ctx: ExtensionContext,
+	metadata: ModelsDevMetadata | null,
+) {
 	while (true) {
-		const allModels = getAvailableModels(ctx);
+		const allModels = getAvailableModels(ctx, metadata);
 		const providers = getProviders(allModels);
 		const freeModels = allModels
 			.filter((m) => m.isFree)
@@ -920,13 +1165,13 @@ async function showProviderView(pi: ExtensionAPI, ctx: ExtensionContext) {
 			() => "__toggle", // Return toggle sentinel on Tab
 		);
 		if (!selectedProvider) {
-			await showModelsBrowser(pi, ctx);
+			await showModelsBrowser(pi, ctx, metadata);
 			return;
 		}
 
 		// Handle toggle to family view
 		if (selectedProvider === "__toggle") {
-			await showFamilyView(pi, ctx);
+			await showFamilyView(pi, ctx, metadata);
 			return;
 		}
 

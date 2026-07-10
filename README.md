@@ -11,11 +11,18 @@ This extension adds a `/models` command to [Pi](https://github.com/badlogic/pi-m
 Pi Models replaces manual model switching with a point-and-select interface:
 
 - **Visual browsing** - See all available models organized by provider or family
-- **Two browsing modes** - Choose your navigation style: by provider (Anthropic → Claude) or by model family (Claude → pick provider)
+- **Three browsing modes** - Choose your navigation style: by provider, lab, or model family
 - **Smart grouping** - Automatically groups models into families (GPT-4, Claude, Llama, etc.)
 - **Multi-provider awareness** - When the same model is available from multiple providers (e.g., Claude via Anthropic, AWS, or Vertex), you choose which one to use
 - **Free model discovery** - All free models from any provider grouped together at the top
 - **No truncation** - Full model names are displayed with dynamic column sizing
+- **Live catalog metadata** - Families and labs are enriched from [models.dev](https://models.dev)
+
+### Live model metadata
+
+When `/models` opens, the extension fetches `api.json` and `catalog.json` from models.dev. Their family and canonical lab metadata is applied to the models already available in Pi, so new families appear without an extension release. Pi's registry remains the source of the selectable models because it knows which providers have credentials and which local models are installed.
+
+The catalog is cached for the current Pi session. If models.dev is unavailable, the existing local family heuristic is used automatically.
 
 ---
 
@@ -95,7 +102,7 @@ After selection, Pi immediately switches to that model:
 
 ## Supported Model Families
 
-The extension automatically categorizes models using pattern matching on model IDs and names:
+The extension uses models.dev family metadata when available and falls back to pattern matching on model IDs and names when a model is not in the catalog:
 
 | Family           | Pattern              | Example IDs Matched                                      |
 | ---------------- | -------------------- | -------------------------------------------------------- |
@@ -127,7 +134,6 @@ The extension automatically categorizes models using pattern matching on model I
 | **Lyria**        | `lyria`              | `lyria-1`, `lyria-v2`                                    |
 | **Veo 2**        | `veo2`               | `veo2`, `veo2-create`                                    |
 | **Ring**         | `ring`               | `ring-1`, `ring-v2`, `inclusion-ring`                    |
-| **Laguna**       | `laguna`             | `laguna-3b`, `laguna-7b`, `poolside-laguna`              |
 | **Poolside**     | `poolside`           | `poolside-laguna`, `poolside-assist`                     |
 | **LFM 2**        | `lfm2`               | `lfm2-7b`, `lfm2-40b`                                    |
 | **Qianfan**      | `qianfan`            | `qianfan-chat`, `qianfan-ernie`                          |
@@ -143,7 +149,7 @@ The extension automatically categorizes models using pattern matching on model I
 
 ### Running Tests
 
-The extension includes a comprehensive test suite (43 tests) covering model family detection, grouping, and utility functions:
+The extension includes an 81-test suite covering model family detection, grouping, models.dev enrichment, and utility functions:
 
 ```bash
 # Install dependencies
@@ -161,15 +167,14 @@ npm run typecheck
 
 ### Test Coverage
 
-| Function              | Tests                                                                 |
-| --------------------- | --------------------------------------------------------------------- |
-| `isModelFree()`       | 5 tests - cost checking edge cases                                    |
-| `formatModelName()`   | 3 tests - name vs ID handling                                         |
-| `getProviders()`      | 5 tests - grouping, sorting, free counting                            |
-| `detectModelFamily()` | 42 tests - all model family patterns, ollama, routers, multi-provider |
-| `getModelFamilies()`  | 5 tests - grouping, sorting, name-based merging                       |
+| Area                    | Coverage                                      |
+| ----------------------- | --------------------------------------------- |
+| `isModelFree()`         | Pricing and name-based free-model detection   |
+| `detectModelFamily()`   | Brand patterns, routers, fallbacks             |
+| Grouping helpers        | Providers, families, labs, and name merging   |
+| models.dev enrichment   | Live family/lab metadata and missing matches  |
 
-**Total: 79 tests** covering all major functionality and edge cases.
+**Total: 81 tests** covering all major functionality and edge cases.
 
 ---
 
@@ -230,6 +235,11 @@ Run `/reload` in Pi.
 ---
 
 ## Changelog
+
+### Unreleased
+
+- **New:** Enrich model families and labs from models.dev at runtime
+- **Improved:** New models.dev families no longer require a manual extension update
 
 ### 0.2.6
 

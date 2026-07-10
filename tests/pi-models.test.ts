@@ -6,6 +6,8 @@ import {
 	detectModelFamily,
 	getModelFamilies,
 	getLabs,
+	createModelsDevMetadata,
+	enrichModelWithModelsDev,
 	type ModelInfo,
 } from "../pi-models";
 
@@ -95,6 +97,46 @@ describe("formatModelName", () => {
 				outputCost: 0,
 			}),
 		).toBe("llama3.2");
+	});
+});
+
+describe("models.dev metadata", () => {
+	it("uses live family and lab metadata when available", () => {
+		const metadata = createModelsDevMetadata(
+			{
+				gateway: {
+					models: {
+						"acme/new-model": {
+							id: "acme/new-model",
+							family: "new-family",
+						},
+					},
+				},
+			},
+			{
+				models: {
+					"acme/new-model": { family: "new-family" },
+				},
+			},
+		);
+
+		const enriched = enrichModelWithModelsDev(
+			model({ id: "acme/new-model", provider: "gateway" }),
+			metadata,
+		);
+
+		expect(enriched.modelsDevFamily).toEqual({
+			familyId: "new-family",
+			familyName: "New Family",
+			lab: "Acme",
+		});
+		expect(detectModelFamily(enriched)?.familyId).toBe("new-family");
+	});
+
+	it("keeps the model unchanged when models.dev has no match", () => {
+		const metadata = createModelsDevMetadata({});
+		const original = model({ id: "local-model", provider: "ollama" });
+		expect(enrichModelWithModelsDev(original, metadata)).toEqual(original);
 	});
 });
 
