@@ -241,6 +241,7 @@ Run `/reload` in Pi.
 
 - **New:** Enrich model families and labs from models.dev at runtime
 - **Improved:** New models.dev families no longer require a manual extension update
+- **Improved:** Free model variants are merged with their base families
 
 ### 0.2.6
 

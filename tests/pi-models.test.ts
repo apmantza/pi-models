@@ -140,17 +140,53 @@ describe("models.dev metadata", () => {
 	});
 
 	it("normalizes equivalent models.dev lab IDs", () => {
-		const metadata = createModelsDevMetadata({}, {
-			models: {
-				"moonshotai/kimi-k2": { family: "kimi" },
-				"zhipuai/glm-5": { family: "glm" },
-				"qwen/qwen3": { family: "qwen" },
+		const metadata = createModelsDevMetadata(
+			{},
+			{
+				models: {
+					"moonshotai/kimi-k2": { family: "kimi" },
+					"zhipuai/glm-5": { family: "glm" },
+					"qwen/qwen3": { family: "qwen" },
+				},
 			},
-		});
+		);
 
 		expect(metadata.familyLabs.get("kimi")).toBe("Moonshot");
 		expect(metadata.familyLabs.get("glm")).toBe("Zhipu");
 		expect(metadata.familyLabs.get("qwen")).toBe("Alibaba");
+	});
+
+	it("merges models.dev free variants into their base family", () => {
+		const metadata = createModelsDevMetadata(
+			{
+				deepseek: {
+					models: {
+						"deepseek-flash": { family: "deepseek-flash" },
+						"deepseek-flash-free": { family: "deepseek-flash-free" },
+					},
+				},
+			},
+			{
+				models: {
+					"deepseek/deepseek-flash": { family: "deepseek-flash" },
+				},
+			},
+		);
+		const models = [
+			enrichModelWithModelsDev(
+				model({ id: "deepseek-flash", provider: "deepseek" }),
+				metadata,
+			),
+			enrichModelWithModelsDev(
+				model({ id: "deepseek-flash-free", provider: "deepseek" }),
+				metadata,
+			),
+		];
+
+		const families = getModelFamilies(models);
+		expect(families).toHaveLength(1);
+		expect(families[0].id).toBe("deepseek-flash");
+		expect(families[0].models).toHaveLength(2);
 	});
 });
 

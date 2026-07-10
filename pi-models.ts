@@ -86,6 +86,10 @@ function humanizeLabSlug(value: string): string {
 	return LAB_ALIASES[value.toLowerCase()] ?? humanizeSlug(value);
 }
 
+function normalizeModelsDevFamilyId(value: string): string {
+	return value.replace(/-free$/, "");
+}
+
 function modelIdVariants(id: string): string[] {
 	const normalized = id.toLowerCase();
 	return normalized.startsWith("@cf/")
@@ -221,8 +225,9 @@ function getModelsDevFamily(
 	metadata: ModelsDevMetadata,
 ): ModelInfo["modelsDevFamily"] {
 	const remoteModel = findModelsDevModel(model, metadata);
-	const familyId = remoteModel?.family?.trim().toLowerCase();
-	if (!familyId) return undefined;
+	const remoteFamilyId = remoteModel?.family?.trim().toLowerCase();
+	if (!remoteFamilyId) return undefined;
+	const familyId = normalizeModelsDevFamilyId(remoteFamilyId);
 
 	// Keep the existing heuristic as a lab fallback. models.dev currently
 	// publishes family IDs but not a lab field in api.json.
@@ -233,7 +238,11 @@ function getModelsDevFamily(
 			familyId === fallback?.familyId
 				? fallback.familyName
 				: humanizeSlug(familyId),
-		lab: metadata.familyLabs.get(familyId) ?? fallback?.lab ?? "Other",
+		lab:
+				metadata.familyLabs.get(remoteFamilyId) ??
+				metadata.familyLabs.get(familyId) ??
+				fallback?.lab ??
+				"Other",
 	};
 }
 
