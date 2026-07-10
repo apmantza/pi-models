@@ -279,6 +279,19 @@ describe("models.dev metadata", () => {
 					"poolside/laguna-xs.2": { family: "laguna" },
 				},
 			},
+			stepfun: {
+				models: {
+					step: { family: "step" },
+					"step-3.5-flash": { family: "step" },
+					"step-3.7-flash": { family: "step" },
+				},
+			},
+			tencent: {
+				models: {
+					"hy3-preview": { family: "Hy" },
+					hy3: { family: "hy3" },
+				},
+			},
 		});
 		const models = [
 			["gemma-4-31b", "google"],
@@ -296,6 +309,11 @@ describe("models.dev metadata", () => {
 			["kimi-k2.6", "moonshotai"],
 			["poolside/laguna-m.1", "poolside"],
 			["poolside/laguna-xs.2", "poolside"],
+			["step", "stepfun"],
+			["step-3.5-flash", "stepfun"],
+			["step-3.7-flash", "stepfun"],
+			["hy3-preview", "tencent"],
+			["hy3", "tencent"],
 		].map(([id, provider]) =>
 			enrichModelWithModelsDev(model({ id, provider }), metadata),
 		);
@@ -318,6 +336,10 @@ describe("models.dev metadata", () => {
 				"Kimi Thinking 2.6",
 				"Laguna M1",
 				"Laguna XS2",
+				"Step 3",
+				"Step 3.5",
+				"Step 3.7",
+				"Hy3",
 			]),
 		);
 	});

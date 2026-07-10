@@ -171,13 +171,26 @@ function extractFamilyVersion(
 
 	const major = Number(match[1]);
 	if (major < 1 || major > 10) return undefined;
-	return (familyRoot === "minimax" || familyRoot === "qwen") && match[2]
+	return (familyRoot === "minimax" ||
+		familyRoot === "qwen" ||
+		familyRoot === "step") &&
+		match[2]
 		? `${match[1]}.${match[2]}`
 		: match[1];
 }
 
+function isUnversionedStepAlias(model: ModelInfo): boolean {
+	const id = model.id
+		.toLowerCase()
+		.split("/")
+		.pop()
+		?.replace(/:free$/, "");
+	return id === "step" || model.name?.trim().toLowerCase() === "step";
+}
+
 function normalizeModelsDevFamilyId(value: string): string {
-	return value.replace(/-free$/, "");
+	const normalized = value.replace(/-free$/, "");
+	return normalized === "hy" || normalized === "hy-3" ? "hy3" : normalized;
 }
 
 const NON_LAB_MODEL_PREFIXES = new Set([
@@ -355,7 +368,9 @@ function getModelsDevFamily(
 	const familyId = normalizeModelsDevFamilyId(
 		remoteFamilyId ?? fallback?.familyId ?? "other",
 	);
-	const version = extractFamilyVersion(model, familyId);
+	const version =
+		extractFamilyVersion(model, familyId) ??
+		(familyId === "step" && isUnversionedStepAlias(model) ? "3" : undefined);
 	const versionedFamilyId = version ? `${familyId}-${version}` : familyId;
 	const lab = remoteFamilyId
 		? (metadata.familyLabs.get(remoteFamilyId) ??
