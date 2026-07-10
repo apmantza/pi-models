@@ -190,7 +190,15 @@ function isUnversionedStepAlias(model: ModelInfo): boolean {
 
 function normalizeModelsDevFamilyId(value: string): string {
 	const normalized = value.replace(/-free$/, "");
-	return normalized === "hy" || normalized === "hy-3" ? "hy3" : normalized;
+	if (normalized === "hy" || normalized === "hy-3") return "hy3";
+	if (normalized === "kimi-thinking") return "kimi-k2";
+	if (/^minimax-m(?:\d+(?:\.\d+)?)$/.test(normalized)) {
+		return "minimax";
+	}
+	if (/^qwen\d+(?:\.\d+)?(?:-|$)/.test(normalized)) {
+		return "qwen";
+	}
+	return normalized;
 }
 
 const NON_LAB_MODEL_PREFIXES = new Set([

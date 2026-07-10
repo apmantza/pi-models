@@ -333,7 +333,7 @@ describe("models.dev metadata", () => {
 				"MiniMax 3",
 				"DeepSeek Pro 4",
 				"DeepSeek Thinking 1",
-				"Kimi Thinking 2.6",
+				"Kimi K2 2.6",
 				"Laguna M1",
 				"Laguna XS2",
 				"Step 3",
@@ -342,6 +342,57 @@ describe("models.dev metadata", () => {
 				"Hy3",
 			]),
 		);
+	});
+
+	it("merges provider-specific MiniMax family IDs", () => {
+		const metadata = createModelsDevMetadata({
+			minimax: {
+				models: {
+					"MiniMax-M2.5": { family: "minimax" },
+					"MiniMax-M2.5-alt": { family: "minimax-m2.5" },
+				},
+			},
+		});
+		const families = getModelFamilies([
+			enrichModelWithModelsDev(
+				model({ id: "MiniMax-M2.5", provider: "minimax" }),
+				metadata,
+			),
+			enrichModelWithModelsDev(
+				model({ id: "MiniMax-M2.5-alt", provider: "minimax" }),
+				metadata,
+			),
+		]);
+
+		expect(families).toHaveLength(1);
+		expect(families[0].id).toBe("minimax-2.5");
+		expect(families[0].models).toHaveLength(2);
+	});
+
+	it("merges Qwen 3.7 Max and Plus into Qwen 3.7", () => {
+		const metadata = createModelsDevMetadata({
+			opencode: {
+				models: {
+					"qwen3.7-max": { family: "qwen3.7-max" },
+					"qwen3.7-plus": { family: "qwen3.7-plus" },
+				},
+			},
+		});
+		const families = getModelFamilies([
+			enrichModelWithModelsDev(
+				model({ id: "qwen3.7-max", provider: "opencode" }),
+				metadata,
+			),
+			enrichModelWithModelsDev(
+				model({ id: "qwen3.7-plus", provider: "opencode" }),
+				metadata,
+			),
+		]);
+
+		expect(families).toHaveLength(1);
+		expect(families[0].id).toBe("qwen-3.7");
+		expect(families[0].displayName).toBe("Qwen 3.7");
+		expect(families[0].models).toHaveLength(2);
 	});
 
 	it("infers families for gateway models missing models.dev family metadata", () => {
