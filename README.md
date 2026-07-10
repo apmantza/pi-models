@@ -117,6 +117,7 @@ The extension uses models.dev family metadata when available and falls back to p
 | **Llama**        | `llama`              | `llama3.2`, `llama-3.3-70b`, `codellama-70b`             |
 | **DeepSeek**     | `deepseek`           | `deepseek-chat`, `deepseek-r1`                           |
 | **Qwen**         | `qwen`               | `qwen3.5-397b`, `qwen3-coder`, `qwen3-vl`                |
+| **Qoder**        | `qoder`              | Qoder coding models                                     |
 | **MiniMax**      | `minimax`            | `minimax-m2.5`, `minimax-m2`                             |
 | **Kimi**         | `kimi` or `moonshot` | `kimi-k2.5`, `moonshot-v1-32k`                           |
 | **GLM**          | `glm` or `chatglm`   | `glm-4.7`, `glm-5`, `chatglm3`                           |

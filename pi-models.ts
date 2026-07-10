@@ -66,12 +66,24 @@ const MODELS_DEV_API_URL = "https://models.dev/api.json";
 const MODELS_DEV_CATALOG_URL = "https://models.dev/catalog.json";
 const MODELS_DEV_TIMEOUT_MS = 2000;
 
+const LAB_ALIASES: Record<string, string> = {
+	moonshot: "Moonshot",
+	qwen: "Alibaba",
+	moonshotai: "Moonshot",
+	zhipu: "Zhipu",
+	zhipuai: "Zhipu",
+};
+
 function humanizeSlug(value: string): string {
 	return value
 		.replace(/^[-_.]+|[-_.]+$/g, "")
 		.split(/[-_.]+/)
 		.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
 		.join(" ");
+}
+
+function humanizeLabSlug(value: string): string {
+	return LAB_ALIASES[value.toLowerCase()] ?? humanizeSlug(value);
 }
 
 function modelIdVariants(id: string): string[] {
@@ -148,7 +160,7 @@ export function createModelsDevMetadata(
 	const familyLabs = new Map<string, string>();
 	for (const [family, counts] of familyLabCounts) {
 		const lab = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
-		if (lab) familyLabs.set(family, humanizeSlug(lab));
+		if (lab) familyLabs.set(family, humanizeLabSlug(lab));
 	}
 
 	return { modelsByProviderAndId, modelsById, familyLabs };
@@ -344,6 +356,15 @@ function isRouterModel(model: ModelInfo): boolean {
 	);
 }
 
+function isQoderModel(model: ModelInfo): boolean {
+	return (
+		model.provider.toLowerCase() === "qoder" ||
+		model.provider.toLowerCase() === "qoderai" ||
+		model.id.toLowerCase().includes("qoder") ||
+		model.name?.toLowerCase().includes("qoder") === true
+	);
+}
+
 function detectModelFamilyHeuristic(
 	model: ModelInfo,
 ): { familyId: string; familyName: string; lab: string } | null {
@@ -361,6 +382,9 @@ function detectModelFamilyHeuristic(
 	// Router models (gateways to free models) - group into "Other"
 	if (isRouterModel(model)) {
 		return { familyId: "other", familyName: "Other", lab: "Other" };
+	}
+	if (isQoderModel(model)) {
+		return { familyId: "qoder", familyName: "Qoder", lab: "Qoder" };
 	}
 
 	// Known brand keywords to check in ID and name
@@ -775,6 +799,9 @@ export function detectModelFamily(
 ): { familyId: string; familyName: string; lab: string } | null {
 	if (isRouterModel(model)) {
 		return { familyId: "other", familyName: "Other", lab: "Other" };
+	}
+	if (isQoderModel(model)) {
+		return { familyId: "qoder", familyName: "Qoder", lab: "Qoder" };
 	}
 	return model.modelsDevFamily ?? detectModelFamilyHeuristic(model);
 }

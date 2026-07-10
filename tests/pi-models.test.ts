@@ -138,6 +138,20 @@ describe("models.dev metadata", () => {
 		const original = model({ id: "local-model", provider: "ollama" });
 		expect(enrichModelWithModelsDev(original, metadata)).toEqual(original);
 	});
+
+	it("normalizes equivalent models.dev lab IDs", () => {
+		const metadata = createModelsDevMetadata({}, {
+			models: {
+				"moonshotai/kimi-k2": { family: "kimi" },
+				"zhipuai/glm-5": { family: "glm" },
+				"qwen/qwen3": { family: "qwen" },
+			},
+		});
+
+		expect(metadata.familyLabs.get("kimi")).toBe("Moonshot");
+		expect(metadata.familyLabs.get("glm")).toBe("Zhipu");
+		expect(metadata.familyLabs.get("qwen")).toBe("Alibaba");
+	});
 });
 
 describe("getProviders", () => {
@@ -206,6 +220,17 @@ describe("detectModelFamily", () => {
 		);
 		expect(result?.familyId).toBe("gpt");
 		expect(result?.lab).toBe("OpenAI");
+	});
+
+	it("keeps Qoder models in their own lab and family", () => {
+		const result = detectModelFamily(
+			model({ id: "qoder-coder", provider: "qoder" }),
+		);
+		expect(result).toEqual({
+			familyId: "qoder",
+			familyName: "Qoder",
+			lab: "Qoder",
+		});
 	});
 
 	it("detects Llama models", () => {
