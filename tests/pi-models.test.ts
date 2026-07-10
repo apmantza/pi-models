@@ -156,6 +156,49 @@ describe("models.dev metadata", () => {
 		expect(metadata.familyLabs.get("qwen")).toBe("Alibaba");
 	});
 
+	it("normalizes routed and Cloudflare model ID prefixes", () => {
+		const metadata = createModelsDevMetadata({
+			gateway: {
+				models: {
+					"pro/moonshotai/kimi-k2": {
+						id: "pro/moonshotai/kimi-k2",
+						family: "kimi",
+					},
+					"@cf/sakana/aura": {
+						id: "@cf/sakana/aura",
+						family: "aura",
+					},
+				},
+			},
+		});
+
+		expect(metadata.familyLabs.get("kimi")).toBe("Moonshot");
+		expect(metadata.familyLabs.get("aura")).toBe("Sakana");
+	});
+
+	it("uses the majority provider prefix for a new family lab", () => {
+		const metadata = createModelsDevMetadata({
+			gateway: {
+				models: {
+					"unrelated/first": {
+						id: "unrelated/first",
+						family: "new-family",
+					},
+					"canonical/second": {
+						id: "canonical/second",
+						family: "new-family",
+					},
+					"canonical/third": {
+						id: "canonical/third",
+						family: "new-family",
+					},
+				},
+			},
+		});
+
+		expect(metadata.familyLabs.get("new-family")).toBe("Canonical");
+	});
+
 	it("merges models.dev free variants into their base family", () => {
 		const metadata = createModelsDevMetadata(
 			{
@@ -186,6 +229,8 @@ describe("models.dev metadata", () => {
 		const families = getModelFamilies(models);
 		expect(families).toHaveLength(1);
 		expect(families[0].id).toBe("deepseek-flash");
+		expect(families[0].displayName).toBe("DeepSeek Flash");
+		expect(families[0].lab).toBe("DeepSeek");
 		expect(families[0].models).toHaveLength(2);
 	});
 });

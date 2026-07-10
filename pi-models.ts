@@ -67,9 +67,24 @@ const MODELS_DEV_CATALOG_URL = "https://models.dev/catalog.json";
 const MODELS_DEV_TIMEOUT_MS = 2000;
 
 const LAB_ALIASES: Record<string, string> = {
+	ai21: "AI21",
+	"ai21-labs": "AI21",
+	baai: "BAAI",
+	bytedance: "ByteDance",
+	deepseek: "DeepSeek",
+	"deepseek-ai": "DeepSeek",
+	inclusionai: "Inclusion AI",
+	intfloat: "Intfloat",
+	klingai: "Kling AI",
+	minimax: "MiniMax",
+	minimaxai: "MiniMax",
 	moonshot: "Moonshot",
-	qwen: "Alibaba",
 	moonshotai: "Moonshot",
+	nvidia: "NVIDIA",
+	nousresearch: "Nous Research",
+	openai: "OpenAI",
+	qwen: "Alibaba",
+	xai: "xAI",
 	zhipu: "Zhipu",
 	zhipuai: "Zhipu",
 };
@@ -86,8 +101,51 @@ function humanizeLabSlug(value: string): string {
 	return LAB_ALIASES[value.toLowerCase()] ?? humanizeSlug(value);
 }
 
+const FAMILY_WORD_ALIASES: Record<string, string> = {
+	ai21: "AI21",
+	bge: "BGE",
+	deepseek: "DeepSeek",
+	e5: "E5",
+	glm: "GLM",
+	gpt: "GPT",
+	lfm2: "LFM 2",
+	minimax: "MiniMax",
+	xai: "xAI",
+};
+
+function humanizeFamilySlug(value: string): string {
+	return value
+		.replace(/^[-_.]+|[-_.]+$/g, "")
+		.split(/[-_.]+/)
+		.map(
+			(part) =>
+				FAMILY_WORD_ALIASES[part.toLowerCase()] ??
+				part.charAt(0).toUpperCase() + part.slice(1),
+		)
+		.join(" ");
+}
+
 function normalizeModelsDevFamilyId(value: string): string {
 	return value.replace(/-free$/, "");
+}
+
+const NON_LAB_MODEL_PREFIXES = new Set([
+	"accounts",
+	"pro",
+	"public",
+	"tee",
+	"workers-ai",
+]);
+
+function getLabSlugFromModelId(id: string): string | undefined {
+	const parts = id.split("/").filter(Boolean);
+	if (parts.length < 2) return undefined;
+
+	const first = parts[0].replace(/^~+/, "").toLowerCase();
+	if (first === "@cf" || NON_LAB_MODEL_PREFIXES.has(first)) {
+		return parts[1].replace(/^~+/, "").replace(/^hf:/i, "");
+	}
+	return parts[0].replace(/^~+/, "").replace(/^hf:/i, "");
 }
 
 function modelIdVariants(id: string): string[] {
@@ -152,13 +210,14 @@ export function createModelsDevMetadata(
 
 	// For families not present in catalog.json, provider model IDs often use
 	// the canonical "lab/model" form. Use the most common prefix as a fallback.
+	const catalogFamilies = new Set(familyLabCounts.keys());
 	for (const model of modelsByProviderAndId.values()) {
 		const family = model.family?.toLowerCase();
 		const id = model.id ?? "";
-		const slash = id.indexOf("/");
-		if (!family || familyLabCounts.has(family) || slash === -1) continue;
+		const lab = getLabSlugFromModelId(id);
+		if (!family || catalogFamilies.has(family) || !lab) continue;
 
-		addFamilyLabCount(familyLabCounts, family, id.slice(0, slash));
+		addFamilyLabCount(familyLabCounts, family, lab);
 	}
 
 	const familyLabs = new Map<string, string>();
@@ -237,12 +296,12 @@ function getModelsDevFamily(
 		familyName:
 			familyId === fallback?.familyId
 				? fallback.familyName
-				: humanizeSlug(familyId),
+				: humanizeFamilySlug(familyId),
 		lab:
-				metadata.familyLabs.get(remoteFamilyId) ??
-				metadata.familyLabs.get(familyId) ??
-				fallback?.lab ??
-				"Other",
+			metadata.familyLabs.get(remoteFamilyId) ??
+			metadata.familyLabs.get(familyId) ??
+			fallback?.lab ??
+			"Other",
 	};
 }
 
