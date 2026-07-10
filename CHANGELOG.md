@@ -4,6 +4,29 @@ All notable changes to the Pi Models extension.
 
 ## [Unreleased]
 
+### Added
+
+### Changed
+
+### Fixed
+
+## [0.2.9] - 2026-07-10
+
+### Added
+
+- Runtime models.dev catalog integration for automatically discovering model families and labs.
+
+### Changed
+
+- Family grouping now includes model versions such as Gemma 4, GPT 5, GLM 4/5, Qwen 3.6/3.7, and MiniMax 2.5/2.7/3.
+- Gateway models without models.dev family metadata now fall back to provider-qualified IDs and model names.
+
+### Fixed
+
+- Merged free variants with their base families and normalized equivalent lab IDs (for example, Qwen/Alibaba, Moonshot/MoonshotAI, Zhipu/ZhipuAI, and Mistral/MistralAI).
+- Corrected Step, Hy3, Laguna, Kimi, MiniMax, and Qwen family parsing and provider-specific aliases.
+- Kept Qoder provider models under Other instead of treating Qoder as a lab.
+
 ## [0.2.8] - 2026-06-21
 
 ### Fixed
@@ -136,6 +159,7 @@ All notable changes to the Pi Models extension.
 
 ---
 
+[0.2.9]: https://github.com/apmantza/pi-models/compare/v0.2.8...v0.2.9
 [0.2.8]: https://github.com/apmantza/pi-models/compare/v0.2.7...v0.2.8
 [0.2.7]: https://github.com/apmantza/pi-models/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/apmantza/pi-models/compare/v0.2.5...v0.2.6

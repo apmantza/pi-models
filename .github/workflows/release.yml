@@ -71,6 +71,13 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Extract curated release notes
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          node scripts/changelog-extract.mjs "$VERSION" --summary \
+            -o "$RUNNER_TEMP/release-notes.md"
+
       - name: Create and push tag
         shell: bash
         run: |
@@ -78,11 +85,12 @@ jobs:
           git push origin "${{ needs.prepare.outputs.tag }}"
 
       - name: Create GitHub release
-        uses: "softprops/action-gh-release@7c4723f7a335432393329f8f1c564994ce50185d"
-        with:
-          tag_name: ${{ needs.prepare.outputs.tag }}
-          name: ${{ needs.prepare.outputs.tag }}
-          generate_release_notes: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+        run: |
+          gh release create "$TAG" --title "$TAG" \
+            --notes-file "$RUNNER_TEMP/release-notes.md"
 
   publish-npm:
     runs-on: ubuntu-latest

@@ -1,6 +1,6 @@
 {
 	"name": "pi-models",
-	"version": "0.2.8",
+	"version": "0.2.9",
 	"description": "Quality-of-life Pi extension for browsing models by provider or family",
 	"main": "pi-models.ts",
 	"keywords": [
@@ -18,12 +18,16 @@
 	},
 	"files": [
 		"pi-models.ts",
-		"README.md"
+		"README.md",
+		"CHANGELOG.md"
 	],
 	"scripts": {
 		"test": "vitest run",
 		"test:watch": "vitest",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "tsc --noEmit",
+		"changelog:check": "node scripts/changelog-release.mjs --check",
+		"changelog:release": "node scripts/changelog-release.mjs",
+		"changelog:extract": "node scripts/changelog-extract.mjs"
 	},
 	"devDependencies": {
 		"@types/node": "^20.19.39",
