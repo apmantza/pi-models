@@ -147,6 +147,7 @@ describe("models.dev metadata", () => {
 					"moonshotai/kimi-k2": { family: "kimi" },
 					"zhipuai/glm-5": { family: "glm" },
 					"qwen/qwen3": { family: "qwen" },
+					"mistralai/codestral": { family: "codestral" },
 				},
 			},
 		);
@@ -154,6 +155,7 @@ describe("models.dev metadata", () => {
 		expect(metadata.familyLabs.get("kimi")).toBe("Moonshot");
 		expect(metadata.familyLabs.get("glm")).toBe("Zhipu");
 		expect(metadata.familyLabs.get("qwen")).toBe("Alibaba");
+		expect(metadata.familyLabs.get("codestral")).toBe("Mistral");
 	});
 
 	it("normalizes routed and Cloudflare model ID prefixes", () => {
@@ -164,8 +166,8 @@ describe("models.dev metadata", () => {
 						id: "pro/moonshotai/kimi-k2",
 						family: "kimi",
 					},
-					"@cf/sakana/aura": {
-						id: "@cf/sakana/aura",
+					"workers-ai/@cf/sakana/aura": {
+						id: "workers-ai/@cf/sakana/aura",
 						family: "aura",
 					},
 				},
@@ -232,6 +234,67 @@ describe("models.dev metadata", () => {
 		expect(families[0].displayName).toBe("DeepSeek Flash");
 		expect(families[0].lab).toBe("DeepSeek");
 		expect(families[0].models).toHaveLength(2);
+	});
+
+	it("groups versioned model families by version", () => {
+		const metadata = createModelsDevMetadata({
+			google: {
+				models: {
+					"gemma-4-31b": { family: "gemma" },
+					"gemma-3-27b": { family: "gemma" },
+				},
+			},
+			openai: { models: { "gpt-5.4": { family: "gpt" } } },
+			zhipu: {
+				models: {
+					"glm-4.7": { family: "glm" },
+					"glm-5": { family: "glm" },
+				},
+			},
+			minimax: {
+				models: {
+					"MiniMax-M2.7": { family: "minimax" },
+					"MiniMax-M2.5": { family: "minimax" },
+					"MiniMax-M3": { family: "minimax" },
+				},
+			},
+			deepseek: {
+				models: {
+					"deepseek-v4-pro": { family: "deepseek-thinking" },
+					"deepseek-r1": { family: "deepseek-thinking" },
+				},
+			},
+		});
+		const models = [
+			["gemma-4-31b", "google"],
+			["gemma-3-27b", "google"],
+			["gpt-5.4", "openai"],
+			["glm-4.7", "zhipu"],
+			["glm-5", "zhipu"],
+			["MiniMax-M2.7", "minimax"],
+			["MiniMax-M2.5", "minimax"],
+			["MiniMax-M3", "minimax"],
+			["deepseek-v4-pro", "deepseek"],
+			["deepseek-r1", "deepseek"],
+		].map(([id, provider]) =>
+			enrichModelWithModelsDev(model({ id, provider }), metadata),
+		);
+		const families = getModelFamilies(models);
+
+		expect(families.map((family) => family.displayName)).toEqual(
+			expect.arrayContaining([
+				"Gemma 3",
+				"Gemma 4",
+				"GPT 5",
+				"GLM 4",
+				"GLM 5",
+				"MiniMax 2.5",
+				"MiniMax 2.7",
+				"MiniMax 3",
+				"DeepSeek Pro 4",
+				"DeepSeek Thinking 1",
+			]),
+		);
 	});
 });
 
@@ -303,14 +366,14 @@ describe("detectModelFamily", () => {
 		expect(result?.lab).toBe("OpenAI");
 	});
 
-	it("keeps Qoder models in their own lab and family", () => {
+	it("groups Qoder provider models under Other", () => {
 		const result = detectModelFamily(
 			model({ id: "qoder-coder", provider: "qoder" }),
 		);
 		expect(result).toEqual({
-			familyId: "qoder",
-			familyName: "Qoder",
-			lab: "Qoder",
+			familyId: "other",
+			familyName: "Other",
+			lab: "Other",
 		});
 	});
 

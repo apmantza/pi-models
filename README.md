@@ -22,7 +22,7 @@ Pi Models replaces manual model switching with a point-and-select interface:
 
 When `/models` opens, the extension fetches `api.json` and `catalog.json` from models.dev. Their family and canonical lab metadata is applied to the models already available in Pi, so new families appear without an extension release. Pi's registry remains the source of the selectable models because it knows which providers have credentials and which local models are installed.
 
-The catalog is cached for the current Pi session. If models.dev is unavailable, the existing local family heuristic is used automatically.
+The catalog is cached for the current Pi session. If models.dev is unavailable, the existing local family heuristic is used automatically. Family labels include detected versions such as Gemma 4, GPT 5, GLM 4/5, and MiniMax 2.5/2.7/3.
 
 ---
 
@@ -117,7 +117,6 @@ The extension uses models.dev family metadata when available and falls back to p
 | **Llama**        | `llama`              | `llama3.2`, `llama-3.3-70b`, `codellama-70b`             |
 | **DeepSeek**     | `deepseek`           | `deepseek-chat`, `deepseek-r1`                           |
 | **Qwen**         | `qwen`               | `qwen3.5-397b`, `qwen3-coder`, `qwen3-vl`                |
-| **Qoder**        | `qoder`              | Qoder coding models                                     |
 | **MiniMax**      | `minimax`            | `minimax-m2.5`, `minimax-m2`                             |
 | **Kimi**         | `kimi` or `moonshot` | `kimi-k2.5`, `moonshot-v1-32k`                           |
 | **GLM**          | `glm` or `chatglm`   | `glm-4.7`, `glm-5`, `chatglm3`                           |

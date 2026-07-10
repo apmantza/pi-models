@@ -78,6 +78,7 @@ const LAB_ALIASES: Record<string, string> = {
 	klingai: "Kling AI",
 	minimax: "MiniMax",
 	minimaxai: "MiniMax",
+	mistralai: "Mistral",
 	moonshot: "Moonshot",
 	moonshotai: "Moonshot",
 	nvidia: "NVIDIA",
@@ -116,13 +117,47 @@ const FAMILY_WORD_ALIASES: Record<string, string> = {
 function humanizeFamilySlug(value: string): string {
 	return value
 		.replace(/^[-_.]+|[-_.]+$/g, "")
-		.split(/[-_.]+/)
+		.split(/[-_]+/)
 		.map(
 			(part) =>
 				FAMILY_WORD_ALIASES[part.toLowerCase()] ??
 				part.charAt(0).toUpperCase() + part.slice(1),
 		)
 		.join(" ");
+}
+
+function getFamilyDisplayName(
+	model: ModelInfo,
+	familyId: string,
+	version: string | undefined,
+): string {
+	let name = humanizeFamilySlug(familyId);
+	const modelText = `${model.name ?? ""} ${model.id}`.toLowerCase();
+	if (familyId === "deepseek-thinking" && /\bpro\b/.test(modelText)) {
+		name = "DeepSeek Pro";
+	}
+	return version ? `${name} ${version}` : name;
+}
+
+function extractMajorVersion(
+	model: ModelInfo,
+	familyId: string,
+): string | undefined {
+	const familyRoot = familyId.split("-")[0];
+	const text = `${model.name ?? ""} ${model.id}`.toLowerCase();
+	const familyIndex = text.indexOf(familyRoot);
+	const searchText =
+		familyIndex === -1 ? text : text.slice(familyIndex + familyRoot.length);
+	const match = searchText.match(
+		/(?:^|[\s._:/-])[vmr]?(\d+)(?:\.(\d+))?(?=$|[\s._:/-])/i,
+	);
+	if (!match) return undefined;
+
+	const major = Number(match[1]);
+	if (major < 1 || major > 10) return undefined;
+	return familyRoot === "minimax" && match[2]
+		? `${match[1]}.${match[2]}`
+		: match[1];
 }
 
 function normalizeModelsDevFamilyId(value: string): string {
@@ -139,13 +174,15 @@ const NON_LAB_MODEL_PREFIXES = new Set([
 
 function getLabSlugFromModelId(id: string): string | undefined {
 	const parts = id.split("/").filter(Boolean);
-	if (parts.length < 2) return undefined;
-
-	const first = parts[0].replace(/^~+/, "").toLowerCase();
-	if (first === "@cf" || NON_LAB_MODEL_PREFIXES.has(first)) {
-		return parts[1].replace(/^~+/, "").replace(/^hf:/i, "");
+	for (let index = 0; index < parts.length - 1; index++) {
+		const part = parts[index].replace(/^~+/, "");
+		const normalized = part.toLowerCase();
+		if (normalized === "@cf" || NON_LAB_MODEL_PREFIXES.has(normalized)) {
+			continue;
+		}
+		return part.replace(/^hf:/i, "");
 	}
-	return parts[0].replace(/^~+/, "").replace(/^hf:/i, "");
+	return undefined;
 }
 
 function modelIdVariants(id: string): string[] {
@@ -287,16 +324,18 @@ function getModelsDevFamily(
 	const remoteFamilyId = remoteModel?.family?.trim().toLowerCase();
 	if (!remoteFamilyId) return undefined;
 	const familyId = normalizeModelsDevFamilyId(remoteFamilyId);
+	const version = extractMajorVersion(model, familyId);
+	const versionedFamilyId = version ? `${familyId}-${version}` : familyId;
 
 	// Keep the existing heuristic as a lab fallback. models.dev currently
 	// publishes family IDs but not a lab field in api.json.
 	const fallback = detectModelFamilyHeuristic(model);
 	return {
-		familyId,
+		familyId: versionedFamilyId,
 		familyName:
-			familyId === fallback?.familyId
+			versionedFamilyId === fallback?.familyId
 				? fallback.familyName
-				: humanizeFamilySlug(familyId),
+				: getFamilyDisplayName(model, familyId, version),
 		lab:
 			metadata.familyLabs.get(remoteFamilyId) ??
 			metadata.familyLabs.get(familyId) ??
@@ -424,12 +463,11 @@ function isRouterModel(model: ModelInfo): boolean {
 	);
 }
 
-function isQoderModel(model: ModelInfo): boolean {
+function isOtherModel(model: ModelInfo): boolean {
 	return (
+		isRouterModel(model) ||
 		model.provider.toLowerCase() === "qoder" ||
-		model.provider.toLowerCase() === "qoderai" ||
-		model.id.toLowerCase().includes("qoder") ||
-		model.name?.toLowerCase().includes("qoder") === true
+		model.provider.toLowerCase() === "qoderai"
 	);
 }
 
@@ -447,12 +485,9 @@ function detectModelFamilyHeuristic(
 
 	const fullText = `${id} ${name}`;
 
-	// Router models (gateways to free models) - group into "Other"
-	if (isRouterModel(model)) {
+	// Router and Qoder provider models are not labs; keep them under "Other".
+	if (isOtherModel(model)) {
 		return { familyId: "other", familyName: "Other", lab: "Other" };
-	}
-	if (isQoderModel(model)) {
-		return { familyId: "qoder", familyName: "Qoder", lab: "Qoder" };
 	}
 
 	// Known brand keywords to check in ID and name
@@ -865,11 +900,8 @@ function detectModelFamilyHeuristic(
 export function detectModelFamily(
 	model: ModelInfo,
 ): { familyId: string; familyName: string; lab: string } | null {
-	if (isRouterModel(model)) {
+	if (isOtherModel(model)) {
 		return { familyId: "other", familyName: "Other", lab: "Other" };
-	}
-	if (isQoderModel(model)) {
-		return { familyId: "qoder", familyName: "Qoder", lab: "Qoder" };
 	}
 	return model.modelsDevFamily ?? detectModelFamilyHeuristic(model);
 }
